@@ -14,6 +14,5 @@ type BorrowedBook struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	UserId    primitive.ObjectID `bson:"user_id" json:"user_id"`
 	BookId    primitive.ObjectID `bson:"book_id" json:"book_id"`
-	Status    string             `bson:"status" json:"status"`
 	BorowedAt string             `bson:"borowed_at" json:"borowed_at"`
 }
