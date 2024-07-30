@@ -1,5 +1,4 @@
-markdown
-Copy code
+
 # Web Service - Gin
 
 This is a simple web service built with the Gin framework in Go. It provides a basic API for managing a collection of music albums.
