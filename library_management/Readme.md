@@ -3,7 +3,7 @@
 
 ## Overview
 
-This project is a library management system built with Go. It provides functionalities to manage books and users, including adding, updating, deleting, and retrieving books and user information. The system also supports borrowing and returning books.
+This project is a library management system built with Go. It provides functionalities to manage books and users, including adding, updating, deleting, borrowing and retrieving books and user information. The system also supports borrowing and returning books.
 
 ## Getting Started
 
@@ -20,29 +20,38 @@ This project is a library management system built with Go. It provides functiona
    git clone https://github.com/AbdulwahidHusein/golang_practice/tree/main/library_management
    cd golang_practice
    cd library_management
+   ```
 
 Install Dependencies:
+```ssh
 go mod tidy
-
-Set Up Environment:
+```
+### Set Up Environment:
 Ensure MongoDB is running and configure the connection settings in your application.
 
-Running the Application
+### Environmental variables
+create .env file under the root directory
+Add MONGO_URI
+
+### Running the Application
 To start the server, use the following command:
 
+```ssh
 go run main.go
+```
 The server will start and listen on the specified port (default is 8080).
 
-API Documentation
+### API Documentation
+you can get comprehensive documentation under <a href="https://github.com/AbdulwahidHusein/golang_practice/blob/main/library_management/docs/APIDoc.md">/doc/APIDoc</a>
 
-you can get comprehensive documentation under /doc/APIDoc
-Base URL
+### Base URL
+```ssh
 http://localhost:8080
+```
 
 Routes
-Books
-Add a Book
 
+```ssh
 Endpoint: /books
 Method: POST
 Description: Adds a new book to the library.
@@ -193,7 +202,8 @@ Responses:
 404 Not Found: User not found.
 500 Internal Server Error: Error deleting the user.
 Error Handling
+```
 The API returns standard HTTP status codes to indicate success or failure of requests. The response body usually contains an error message describing the issue.
 
-Contributing
+###Contributing
 Contributions are welcome! Please fork the repository and submit a pull request with your changes.
