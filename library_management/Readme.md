@@ -29,6 +29,10 @@ go mod tidy
 ##Set Up Environment:
 Ensure MongoDB is running and configure the connection settings in your application.
 
+### Environmental variables
+create .env file under the root directory
+Add MONGO_URI
+
 ##Running the Application
 To start the server, use the following command:
 
