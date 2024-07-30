@@ -42,7 +42,7 @@ go run main.go
 The server will start and listen on the specified port (default is 8080).
 
 ### API Documentation
-you can get comprehensive documentation under /doc/APIDoc
+you can get comprehensive documentation under <a href="https://github.com/AbdulwahidHusein/golang_practice/blob/main/library_management/docs/APIDoc.md">/doc/APIDoc</a>
 
 ### Base URL
 ```ssh
