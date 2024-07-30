@@ -50,8 +50,6 @@ http://localhost:8080
 ```
 
 Routes
-Books
-Add a Book
 
 ```ssh
 Endpoint: /books
