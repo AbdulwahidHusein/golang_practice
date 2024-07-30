@@ -10,4 +10,5 @@ func RegisterTaskRoutes(router *chi.Mux, taskController *controllers.TaskControl
 	router.Get("/tasks", taskController.GetTasks)
 	router.Get("/tasks/{id}", taskController.GetTask)
 	router.Put("/tasks/{id}", taskController.UpdateTask)
+	router.Post("/tasks", taskController.CreateTask)
 }

@@ -16,18 +16,17 @@ func NewTaskController(service *services.TaskService) *TaskController {
 	return &TaskController{taskService: service}
 }
 
-func (c *TaskController) AddTask(r *http.Request, w http.ResponseWriter) error {
+func (c *TaskController) CreateTask(w http.ResponseWriter, r *http.Request) {
 	task := models.Task{}
 
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		return err
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 	err := c.taskService.AddTask(&task)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.WriteHeader(http.StatusCreated)
-	return nil
 }
 
 func (c *TaskController) GetTasks(w http.ResponseWriter, r *http.Request) {
