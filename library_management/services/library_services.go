@@ -4,8 +4,6 @@ import (
 	"context"
 	"library_management/models"
 
-	"fmt"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -72,50 +70,16 @@ func (l *LibraryService) DeleteBook(id primitive.ObjectID) error {
 	return nil
 }
 
-func (l *LibraryService) BorrowBook(client *mongo.Client, borrow *models.BorrowedBook) error {
-	// Start a session. here atomicity is nedded
-	session, err := client.StartSession()
+func (l *LibraryService) BorrowBook(borrow *models.BorrowedBook) error {
+	bookId := borrow.BookId
+	_, err1 := l.book_collection.UpdateOne(context.TODO(), bson.M{"_id": bookId}, bson.M{"$set": bson.M{"status": "borrowed"}})
+	if err1 != nil {
+		return err1
+	}
+	_, err := l.borrow_collection.InsertOne(context.TODO(), borrow)
 	if err != nil {
 		return err
 	}
-	defer session.EndSession(context.TODO())
-
-	var transactionErr error
-	err = mongo.WithSession(context.TODO(), session, func(sc mongo.SessionContext) error {
-		// Start the transaction.
-		if err := session.StartTransaction(); err != nil {
-			return err
-		}
-
-		bookId := borrow.BookId
-
-		// Update the book status.
-		_, err := l.book_collection.UpdateOne(sc, bson.M{"_id": bookId}, bson.M{"$set": bson.M{"status": "borrowed"}})
-		if err != nil {
-			transactionErr = err
-			return err
-		}
-
-		// Insert the borrowed book record.
-		_, err = l.borrow_collection.InsertOne(sc, borrow)
-		if err != nil {
-			transactionErr = err
-			return err
-		}
-
-		// Commit the transaction.
-		return session.CommitTransaction(sc)
-	})
-
-	// Check if the transaction failed.
-	if err != nil {
-		// Abort the transaction if necessary.
-		if abortErr := session.AbortTransaction(context.TODO()); abortErr != nil {
-			return fmt.Errorf("failed to abort transaction: %v", abortErr)
-		}
-		return transactionErr
-	}
-
 	return nil
 }
 
@@ -137,6 +101,11 @@ func (l *LibraryService) GetBorrowedBooks(userId primitive.ObjectID) ([]*models.
 }
 
 func (l *LibraryService) UnborrowBook(borrow *models.BorrowedBook) error {
+	bookId := borrow.BookId
+	_, err1 := l.book_collection.UpdateOne(context.TODO(), bson.M{"_id": bookId}, bson.M{"$set": bson.M{"status": "available"}})
+	if err1 != nil {
+		return err1
+	}
 	_, err := l.borrow_collection.DeleteOne(context.TODO(), bson.M{"_id": borrow.ID})
 	if err != nil {
 		return err
