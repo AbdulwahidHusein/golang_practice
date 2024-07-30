@@ -4,4 +4,8 @@
 #that calculates grades and cumulative grade based on given score for multiple courses
 
 #how to install 
-```git clone```
+
+```git clone` https://github.com/AbdulwahidHusein/golang_practice.git``
+```cd golang_practice```
+```cd grade_calculator```
+```go run main.go```
