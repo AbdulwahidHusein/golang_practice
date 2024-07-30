@@ -32,3 +32,9 @@ Biology              A+
 GPA: 3.33
 Cumulative Grade B-
 ```
+### test
+run 
+
+```sh
+go test ./utils
+``
