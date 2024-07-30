@@ -3,7 +3,7 @@
 
 ## Overview
 
-This project is a library management system built with Go. It provides functionalities to manage books and users, including adding, updating, deleting, and retrieving books and user information. The system also supports borrowing and returning books.
+This project is a library management system built with Go. It provides functionalities to manage books and users, including adding, updating, deleting, borrowing and retrieving books and user information. The system also supports borrowing and returning books.
 
 ## Getting Started
 
@@ -26,14 +26,14 @@ Install Dependencies:
 ```ssh
 go mod tidy
 ```
-##Set Up Environment:
+### Set Up Environment:
 Ensure MongoDB is running and configure the connection settings in your application.
 
 ### Environmental variables
 create .env file under the root directory
 Add MONGO_URI
 
-##Running the Application
+### Running the Application
 To start the server, use the following command:
 
 ```ssh
@@ -41,10 +41,10 @@ go run main.go
 ```
 The server will start and listen on the specified port (default is 8080).
 
-###API Documentation
+### API Documentation
 you can get comprehensive documentation under /doc/APIDoc
 
-##Base URL
+### Base URL
 ```ssh
 http://localhost:8080
 ```
