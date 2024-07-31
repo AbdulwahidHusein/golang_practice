@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"task_management_api/models"
 	"task_management_api/services"
+
+	"github.com/gin-gonic/gin"
 	// "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -16,54 +18,53 @@ func NewTaskController(service *services.TaskService) *TaskController {
 	return &TaskController{taskService: service}
 }
 
-func (c *TaskController) CreateTask(w http.ResponseWriter, r *http.Request) {
+func (c *TaskController) CreateTask(ctx *gin.Context) {
 	task := models.Task{}
 
-	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := json.NewDecoder(ctx.Request.Body).Decode(&task); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	err := c.taskService.AddTask(&task)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.WriteHeader(http.StatusCreated)
-}
-
-func (c *TaskController) GetTasks(w http.ResponseWriter, r *http.Request) {
-	tasks, err := c.taskService.GetTasks()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tasks)
+	ctx.JSON(http.StatusCreated, task)
 }
 
-func (c *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
-	taskId := r.URL.Query().Get("id")
+func (c *TaskController) GetTasks(ctx *gin.Context) {
+	tasks, err := c.taskService.GetTasks()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, tasks)
+}
+
+func (c *TaskController) GetTask(ctx *gin.Context) {
+	taskId := ctx.Param("id")
 	task, err := c.taskService.GetTask(taskId)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(task)
+	ctx.JSON(http.StatusOK, task)
 }
 
-func (c *TaskController) UpdateTask(w http.ResponseWriter, r *http.Request) {
+func (c *TaskController) UpdateTask(ctx *gin.Context) {
 	task := models.Task{}
 
-	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := json.NewDecoder(ctx.Request.Body).Decode(&task); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := c.taskService.UpdateTask(task.ID, &task)
+	err := c.taskService.UpdateTask(&task)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(task)
+	ctx.JSON(http.StatusOK, task)
 }

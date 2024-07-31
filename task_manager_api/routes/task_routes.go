@@ -3,12 +3,13 @@ package routes
 import (
 	"task_management_api/controllers"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gin-gonic/gin"
 )
 
-func RegisterTaskRoutes(router *chi.Mux, taskController *controllers.TaskController) {
-	router.Get("/tasks", taskController.GetTasks)
-	router.Get("/tasks/{id}", taskController.GetTask)
-	router.Put("/tasks/{id}", taskController.UpdateTask)
-	router.Post("/tasks", taskController.CreateTask)
+func RegisterTaskRoutes(router *gin.Engine, taskController *controllers.TaskController) {
+	router.GET("/tasks", taskController.GetTasks)
+	router.GET("/tasks/:id", taskController.GetTask)
+	router.PUT("/tasks/:id", taskController.UpdateTask)
+	router.POST("/tasks", taskController.CreateTask)
+	// routes.DELETE("/tasks/:id", taskController.)
 }

@@ -11,8 +11,7 @@ import (
 	"log"
 	"task_management_api/routes"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -26,9 +25,7 @@ func main() {
 		}
 	}()
 
-	router := chi.NewRouter()
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
+	router := gin.Default()
 
 	taskservice := services.NewTaskService(client)
 	taskController := controllers.NewTaskController(taskservice)

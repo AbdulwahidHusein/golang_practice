@@ -20,7 +20,7 @@ func NewTaskService(client *mongo.Client) *TaskService {
 }
 
 func (s *TaskService) AddTask(task *models.Task) error {
-
+	task.ID = primitive.NewObjectID()
 	_, err := s.task_collection.InsertOne(context.TODO(), task)
 	if err != nil {
 		return err
@@ -55,9 +55,9 @@ func (s *TaskService) GetTask(id string) (*models.Task, error) {
 	return &task, nil
 }
 
-func (s *TaskService) UpdateTask(id string, task *models.Task) error {
-	oid, _ := primitive.ObjectIDFromHex(id)
-	_, err := s.task_collection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": task})
+func (s *TaskService) UpdateTask(task *models.Task) error {
+	id := task.ID
+	_, err := s.task_collection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": task})
 	if err != nil {
 		return err
 	}
