@@ -68,3 +68,13 @@ func (c *TaskController) UpdateTask(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, task)
 }
+
+func (c *TaskController) DeleteTask(ctx *gin.Context) {
+	taskId := ctx.Param("id")
+	err := c.taskService.DeleteTask(taskId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
+}
