@@ -20,7 +20,7 @@ func NewLibraryService(client *mongo.Client) *LibraryService {
 	return &LibraryService{book_collection, borrow_collection}
 }
 
-func (l *LibraryService) AddBook(book *models.Book) error {
+func (l *LibraryService) AddBookService(book *models.Book) error {
 	_, err := l.book_collection.InsertOne(context.TODO(), book)
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func (l *LibraryService) AddBook(book *models.Book) error {
 	return nil
 }
 
-func (l *LibraryService) GetBooks() ([]*models.Book, error) {
+func (l *LibraryService) GetBooksService() ([]*models.Book, error) {
 	var books []*models.Book
 	cursor, err := l.book_collection.Find(context.TODO(), bson.M{})
 	if err != nil {
@@ -45,7 +45,7 @@ func (l *LibraryService) GetBooks() ([]*models.Book, error) {
 	return books, nil
 }
 
-func (l *LibraryService) GetBook(id primitive.ObjectID) (*models.Book, error) {
+func (l *LibraryService) GetBookService(id primitive.ObjectID) (*models.Book, error) {
 	var book models.Book
 	err := l.book_collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&book)
 	if err != nil {
@@ -54,7 +54,7 @@ func (l *LibraryService) GetBook(id primitive.ObjectID) (*models.Book, error) {
 	return &book, nil
 }
 
-func (l *LibraryService) UpdateBook(id primitive.ObjectID, book *models.Book) error {
+func (l *LibraryService) UpdateBookService(id primitive.ObjectID, book *models.Book) error {
 	_, err := l.book_collection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": book})
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (l *LibraryService) UpdateBook(id primitive.ObjectID, book *models.Book) er
 	return nil
 }
 
-func (l *LibraryService) DeleteBook(id primitive.ObjectID) error {
+func (l *LibraryService) DeleteBookService(id primitive.ObjectID) error {
 	_, err := l.book_collection.DeleteOne(context.TODO(), bson.M{"_id": id})
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (l *LibraryService) DeleteBook(id primitive.ObjectID) error {
 	return nil
 }
 
-func (l *LibraryService) BorrowBook(borrow *models.BorrowedBook) error {
+func (l *LibraryService) BorrowBookService(borrow *models.BorrowedBook) error {
 	bookId := borrow.BookId
 	_, err1 := l.book_collection.UpdateOne(context.TODO(), bson.M{"_id": bookId}, bson.M{"$set": bson.M{"status": "borrowed"}})
 	if err1 != nil {
@@ -83,7 +83,7 @@ func (l *LibraryService) BorrowBook(borrow *models.BorrowedBook) error {
 	return nil
 }
 
-func (l *LibraryService) GetBorrowedBooks(userId primitive.ObjectID) ([]*models.BorrowedBook, error) {
+func (l *LibraryService) GetBorrowedBooksService(userId primitive.ObjectID) ([]*models.BorrowedBook, error) {
 	var borrowedBooks []*models.BorrowedBook
 	cursor, err := l.borrow_collection.Find(context.TODO(), bson.M{"user_id": userId})
 	if err != nil {
@@ -100,7 +100,7 @@ func (l *LibraryService) GetBorrowedBooks(userId primitive.ObjectID) ([]*models.
 	return borrowedBooks, nil
 }
 
-func (l *LibraryService) UnborrowBook(borrow *models.BorrowedBook) error {
+func (l *LibraryService) ReturnBookService(borrow *models.BorrowedBook) error {
 	bookId := borrow.BookId
 	_, err1 := l.book_collection.UpdateOne(context.TODO(), bson.M{"_id": bookId}, bson.M{"$set": bson.M{"status": "available"}})
 	if err1 != nil {
@@ -113,7 +113,7 @@ func (l *LibraryService) UnborrowBook(borrow *models.BorrowedBook) error {
 	return nil
 }
 
-func (l *LibraryService) GetAvailableBooks() ([]*models.Book, error) {
+func (l *LibraryService) GetAvailableBooksService() ([]*models.Book, error) {
 	var books []*models.Book
 	cursor, err := l.book_collection.Find(context.TODO(), bson.M{"status": "available"})
 	if err != nil {

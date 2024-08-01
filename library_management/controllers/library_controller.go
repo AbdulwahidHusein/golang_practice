@@ -3,23 +3,34 @@ package controllers
 import (
 	"encoding/json"
 	"library_management/models"
-	"library_management/services"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type LibraryController struct {
-	LibraryService *services.LibraryService
+type LibraryManager interface {
+	GetBookService(id primitive.ObjectID) (*models.Book, error)
+	GetBooksService() ([]*models.Book, error)
+	AddBookService(book *models.Book) error
+	UpdateBookService(id primitive.ObjectID, book *models.Book) error
+	DeleteBookService(id primitive.ObjectID) error
+	BorrowBookService(borrow *models.BorrowedBook) error
+	GetBorrowedBooksService(userId primitive.ObjectID) ([]*models.BorrowedBook, error)
+	ReturnBookService(borrow *models.BorrowedBook) error
+	GetAvailableBooksService() ([]*models.Book, error)
 }
 
-func NewLibraryController(service *services.LibraryService) *LibraryController {
+type LibraryController struct {
+	LibraryService LibraryManager
+}
+
+func NewLibraryController(service LibraryManager) *LibraryController {
 	return &LibraryController{service}
 }
 
 func (l *LibraryController) GetBooks(w http.ResponseWriter, r *http.Request) {
-	books, err := l.LibraryService.GetBooks()
+	books, err := l.LibraryService.GetBooksService()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -35,7 +46,7 @@ func (l *LibraryController) GetBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid book ID", http.StatusBadRequest)
 		return
 	}
-	book, err := l.LibraryService.GetBook(bookId)
+	book, err := l.LibraryService.GetBookService(bookId)
 	if err != nil {
 		http.Error(w, "Book not found", http.StatusNotFound)
 		return
@@ -45,7 +56,7 @@ func (l *LibraryController) GetBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (l *LibraryController) GetAvailableBooks(w http.ResponseWriter, r *http.Request) {
-	books, err := l.LibraryService.GetAvailableBooks()
+	books, err := l.LibraryService.GetAvailableBooksService()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -61,7 +72,7 @@ func (l *LibraryController) AddBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
-	err = l.LibraryService.AddBook(&book)
+	err = l.LibraryService.AddBookService(&book)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -77,7 +88,7 @@ func (l *LibraryController) UpdateBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
-	err = l.LibraryService.UpdateBook(book.ID, &book)
+	err = l.LibraryService.UpdateBookService(book.ID, &book)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -93,7 +104,7 @@ func (l *LibraryController) DeleteBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid book ID", http.StatusBadRequest)
 		return
 	}
-	err = l.LibraryService.DeleteBook(bookId)
+	err = l.LibraryService.DeleteBookService(bookId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -108,7 +119,7 @@ func (l *LibraryController) BorrowBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
-	err = l.LibraryService.BorrowBook(&borrow)
+	err = l.LibraryService.BorrowBookService(&borrow)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -124,7 +135,7 @@ func (l *LibraryController) ReturnBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
-	err = l.LibraryService.UnborrowBook(&borrow)
+	err = l.LibraryService.ReturnBookService(&borrow)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -140,7 +151,7 @@ func (l *LibraryController) GetUserBorrowedBooks(w http.ResponseWriter, r *http.
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	borrowedBooks, err := l.LibraryService.GetBorrowedBooks(userId)
+	borrowedBooks, err := l.LibraryService.GetBorrowedBooksService(userId)
 	if err != nil {
 		http.Error(w, "Error retrieving borrowed books", http.StatusInternalServerError)
 		return
