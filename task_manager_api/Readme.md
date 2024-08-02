@@ -7,26 +7,26 @@ This repository contains the source code for a Task Manager API built using the 
 ### Installation
 ## Clone the repository:
 
-sh```
+```
 git clone https://github.com/abdulwahidHussein/golang_practice.git
 ```
 # Change to the project directory:
 
-
+```
 cd task_manager_api
 cd task_manager_api
-
+```
 
 ## Install dependencies:
 
-sh```
+```
 go mod tidy
 ```
 
 
 ### Run the application:
 
-sh```
+```
 go run main.go
 ```
 
