@@ -6,12 +6,13 @@ import (
 	"task_management_api/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	// "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TaskDbOperator interface {
 	AddTask(task *models.Task) error
-	GetTasks() ([]*models.Task, error)
+	GetTasks(userId string) ([]*models.Task, error)
 	GetTask(id string) (*models.Task, error)
 	UpdateTask(task *models.Task) error
 	DeleteTask(id string) error
@@ -43,7 +44,14 @@ func (c *TaskController) CreateTask(ctx *gin.Context) {
 }
 
 func (c *TaskController) GetTasks(ctx *gin.Context) {
-	tasks, err := c.taskService.GetTasks()
+	claims, exists := ctx.Get("claims")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization headers not found"})
+		return
+	}
+	userId := claims.(jwt.MapClaims)["userId"].(string)
+	tasks, err := c.taskService.GetTasks(userId)
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

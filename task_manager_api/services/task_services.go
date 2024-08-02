@@ -28,7 +28,7 @@ func (s *TaskService) AddTask(task *models.Task) error {
 	return nil
 }
 
-func (s *TaskService) GetTasks() ([]*models.Task, error) {
+func (s *TaskService) GetTasks(userId string) ([]*models.Task, error) {
 	var tasks []*models.Task
 	cursor, err := s.task_collection.Find(context.TODO(), bson.M{})
 	if err != nil {
