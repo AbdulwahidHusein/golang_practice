@@ -72,3 +72,37 @@ func (s *TaskService) DeleteTask(id string) error {
 	}
 	return nil
 }
+
+func (s *TaskService) GetDoneTasks() ([]*models.Task, error) {
+	var tasks []*models.Task
+	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"status": "done"})
+	if err != nil {
+		return nil, err
+	}
+	for cursor.Next(context.TODO()) {
+		var task models.Task
+		err := cursor.Decode(&task)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, &task)
+	}
+	return tasks, nil
+}
+
+func (s *TaskService) GetUndoneTasks() ([]*models.Task, error) {
+	var tasks []*models.Task
+	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": "done"}})
+	if err != nil {
+		return nil, err
+	}
+	for cursor.Next(context.TODO()) {
+		var task models.Task
+		err := cursor.Decode(&task)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, &task)
+	}
+	return tasks, nil
+}

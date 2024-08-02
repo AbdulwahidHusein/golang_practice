@@ -12,4 +12,6 @@ func RegisterTaskRoutes(router *gin.Engine, taskController *controllers.TaskCont
 	router.PUT("/tasks/:id", taskController.UpdateTask)
 	router.POST("/tasks", taskController.CreateTask)
 	router.DELETE("/tasks/:id", taskController.DeleteTask)
+	router.GET("/tasks/done", taskController.GetDoneTasks)
+	router.GET("/tasks/undone", taskController.GetUndoneTasks)
 }

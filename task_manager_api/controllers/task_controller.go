@@ -4,18 +4,27 @@ import (
 	"encoding/json"
 	"net/http"
 	"task_management_api/models"
-	"task_management_api/services"
 
 	"github.com/gin-gonic/gin"
 	// "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type TaskController struct {
-	taskService *services.TaskService
+type TaskDbOperator interface {
+	AddTask(task *models.Task) error
+	GetTasks() ([]*models.Task, error)
+	GetTask(id string) (*models.Task, error)
+	UpdateTask(task *models.Task) error
+	DeleteTask(id string) error
+	GetDoneTasks() ([]*models.Task, error)
+	GetUndoneTasks() ([]*models.Task, error)
 }
 
-func NewTaskController(service *services.TaskService) *TaskController {
-	return &TaskController{taskService: service}
+type TaskController struct {
+	taskService TaskDbOperator
+}
+
+func NewTaskController(service TaskDbOperator) *TaskController {
+	return &TaskController{service}
 }
 
 func (c *TaskController) CreateTask(ctx *gin.Context) {
@@ -77,4 +86,22 @@ func (c *TaskController) DeleteTask(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
+}
+
+func (c *TaskController) GetDoneTasks(ctx *gin.Context) {
+	tasks, err := c.taskService.GetDoneTasks()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, tasks)
+}
+
+func (c *TaskController) GetUndoneTasks(ctx *gin.Context) {
+	tasks, err := c.taskService.GetUndoneTasks()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, tasks)
 }
