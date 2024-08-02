@@ -60,6 +60,7 @@ func (s *UserService) CreateUser(c *gin.Context) {
 	}
 
 	u.ID = primitive.NewObjectID()
+	// u.Role = "user"
 	_, err = s.UserCollection.InsertOne(context.TODO(), u)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
@@ -118,7 +119,7 @@ func (s *UserService) LoginUser(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := config.CreateToken(guest.Email)
+	tokenString, err := config.CreateToken(guest.Email, guest.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token: " + err.Error()})
 		return

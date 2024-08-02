@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func CreateToken(email string) (string, error) {
+func CreateToken(email, role string) (string, error) {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -28,6 +28,7 @@ func CreateToken(email string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
+		"role":  role,
 		"exp":   time.Now().Add(time.Hour * time.Duration(tokenExpiryInt)).Unix(),
 	})
 
@@ -39,22 +40,36 @@ func CreateToken(email string) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyToken(tokenString string) error {
+func VerifyToken(tokenString string) (string, error) {
+	if err := godotenv.Load(); err != nil {
+		return "", fmt.Errorf("Error loading .env file")
+	}
 	secretKey := []byte(os.Getenv("SECRET_KEY"))
 	if len(secretKey) == 0 {
-		return fmt.Errorf("SECRET_KEY not set in .env file")
+		return "", fmt.Errorf("SECRET_KEY not set in .env file")
 	}
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if !token.Valid {
-		return jwt.ErrSignatureInvalid
+		return "", jwt.ErrSignatureInvalid
 	}
 
-	return nil
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", fmt.Errorf("invalid token claims")
+	}
+
+	role, ok := claims["role"].(string)
+	if !ok {
+		return "", fmt.Errorf("role not found in token claims")
+	}
+
+	return role, nil
 }

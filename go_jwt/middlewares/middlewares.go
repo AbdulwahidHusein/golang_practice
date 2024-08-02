@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// AuthMiddleware checks if the request has a valid token
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -52,6 +53,37 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		// Store the claims in the context for later retrieval
+		c.Set("claims", claims)
+
+		c.Next()
+	}
+}
+
+// IsAdmin checks if the user has admin role
+func IsAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claims, exists := c.Get("claims")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Claims not found"})
+			c.Abort()
+			return
+		}
+
+		role, ok := claims.(jwt.MapClaims)["role"].(string)
+		if !ok || role != "admin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden: Admins only"})
 			c.Abort()
 			return
 		}

@@ -22,6 +22,7 @@ func main() {
 	router.POST("/login", service.LoginUser)
 	router.GET("/users", service.GetUsers)
 	router.GET("/verify", middlewares.AuthMiddleware(), func(c *gin.Context) { c.JSON(200, gin.H{"data": "valid token"}) })
+	router.GET("/admin", middlewares.AuthMiddleware(), middlewares.IsAdmin(), func(c *gin.Context) { c.JSON(200, gin.H{"data": "you are admin"}) })
 
 	log.Fatal(router.Run(":8080"))
 }
