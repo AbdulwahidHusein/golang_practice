@@ -30,7 +30,11 @@ func main() {
 	taskservice := services.NewTaskService(client)
 	taskController := controllers.NewTaskController(taskservice)
 
+	userServices := services.NewUserServices(client)
+	userController := controllers.NewUSerController(userServices)
+
 	routes.RegisterTaskRoutes(router, taskController)
+	routes.RegisterUserRoutes(router, userController)
 
 	http.ListenAndServe(":8080", router)
 }

@@ -15,7 +15,7 @@ type UserDBOperator interface {
 	DeleteUser(id primitive.ObjectID) error
 	UpdateUser(id primitive.ObjectID, user *models.User) error
 	GetUser(id primitive.ObjectID) (*models.User, error)
-	LoginUser(email string, password string) (*models.User, error)
+	LoginUser(email string) (*models.User, error)
 	CheckUser(email string) (*models.User, error)
 }
 
@@ -61,7 +61,7 @@ func (u *UserController) AddUser(c *gin.Context) {
 func (u *UserController) LoginUser(c *gin.Context) {
 	var guest models.User
 	c.ShouldBindJSON(&guest)
-	dbUser, err := u.UserDBOperator.LoginUser(guest.Email, guest.Password)
+	dbUser, err := u.UserDBOperator.LoginUser(guest.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

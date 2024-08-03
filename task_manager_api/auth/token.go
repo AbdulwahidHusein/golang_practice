@@ -21,7 +21,7 @@ func CreateToken(userId, role string) (string, error) {
 		"exp":    time.Now().Add(time.Hour * time.Duration(tokenExpiryInt)).Unix(),
 	})
 
-	tokenString, err := token.SignedString(secretKey)
+	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
 	}
@@ -36,7 +36,7 @@ func VerifyToken(tokenString string) (jwt.MapClaims, error) {
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+		return []byte(secretKey), nil
 	})
 
 	if err != nil {

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"task_management_api/auth"
 
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -32,6 +34,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		c.Set("claims", claims)
+		fmt.Println(claims)
 		c.Next()
 	}
 }

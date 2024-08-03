@@ -19,6 +19,7 @@ func NewUserServices(client *mongo.Client) *UserServices {
 }
 
 func (u *UserServices) AddUser(user *models.User) error {
+	user.ID = primitive.NewObjectID()
 	_, err := u.user_collection.InsertOne(context.TODO(), user)
 	if err != nil {
 		return err
@@ -54,10 +55,10 @@ func (u *UserServices) GetUser(id primitive.ObjectID) (*models.User, error) {
 	return &user, nil
 }
 
-func (u *UserServices) LoginUser(email string, password string) (*models.User, error) {
+func (u *UserServices) LoginUser(email string) (*models.User, error) {
 
 	var user models.User
-	err := u.user_collection.FindOne(context.TODO(), bson.M{"email": email, "password": password}).Decode(&user)
+	err := u.user_collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}

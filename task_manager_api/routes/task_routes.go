@@ -3,15 +3,19 @@ package routes
 import (
 	"task_management_api/controllers"
 
+	"task_management_api/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterTaskRoutes(router *gin.Engine, taskController *controllers.TaskController) {
-	router.GET("/tasks", taskController.GetTasks)
-	router.GET("/tasks/:id", taskController.GetTask)
-	router.PUT("/tasks/:id", taskController.UpdateTask)
-	router.POST("/tasks", taskController.CreateTask)
-	router.DELETE("/tasks/:id", taskController.DeleteTask)
-	router.GET("/tasks/done", taskController.GetDoneTasks)
-	router.GET("/tasks/undone", taskController.GetUndoneTasks)
+	authorized := router.Group("/", middleware.AuthMiddleware())
+
+	authorized.GET("/tasks", taskController.GetTasks)
+	authorized.GET("/tasks/:id", taskController.GetTask)
+	authorized.PUT("/tasks/:id", taskController.UpdateTask)
+	authorized.POST("/tasks", taskController.CreateTask)
+	authorized.DELETE("/tasks/:id", taskController.DeleteTask)
+	authorized.GET("/tasks/done", taskController.GetDoneTasks)
+	authorized.GET("/tasks/undone", taskController.GetUndoneTasks)
 }
