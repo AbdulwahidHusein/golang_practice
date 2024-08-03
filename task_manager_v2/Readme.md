@@ -34,4 +34,4 @@ go run main.go
 
 
 ### API DOCUMENTATION: Visit 
-<a href="https://documenter.getpostman.com/view/28093624/2sA3rwKtUV"> Documentation Link</a>
+<a href="https://documenter.getpostman.com/view/28093624/2sA3rwMZaX"> Documentation Link</a>

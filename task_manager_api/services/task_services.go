@@ -28,9 +28,9 @@ func (s *TaskService) AddTask(task *models.Task) error {
 	return nil
 }
 
-func (s *TaskService) GetTasks() ([]*models.Task, error) {
+func (s *TaskService) GetTasks(userId primitive.ObjectID) ([]*models.Task, error) {
 	var tasks []*models.Task
-	cursor, err := s.task_collection.Find(context.TODO(), bson.M{})
+	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"user_id": userId})
 	if err != nil {
 		return nil, err
 	}
@@ -73,9 +73,10 @@ func (s *TaskService) DeleteTask(id string) error {
 	return nil
 }
 
-func (s *TaskService) GetDoneTasks() ([]*models.Task, error) {
+func (s *TaskService) GetDoneTasks(userId primitive.ObjectID) ([]*models.Task, error) {
 	var tasks []*models.Task
-	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"status": "done"})
+
+	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"status": "done", "user_id": userId})
 	if err != nil {
 		return nil, err
 	}
@@ -90,9 +91,9 @@ func (s *TaskService) GetDoneTasks() ([]*models.Task, error) {
 	return tasks, nil
 }
 
-func (s *TaskService) GetUndoneTasks() ([]*models.Task, error) {
+func (s *TaskService) GetUndoneTasks(userId primitive.ObjectID) ([]*models.Task, error) {
 	var tasks []*models.Task
-	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": "done"}})
+	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": "done"}, "user_id": userId})
 	if err != nil {
 		return nil, err
 	}
