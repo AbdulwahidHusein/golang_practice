@@ -1,14 +1,13 @@
 package main
 
-//"github.com/gin-gonic/gin"
 import (
 	"net/http"
+	"task_managemet_api/cmd/task_manager/cmd/bootstrap"
+	"task_managemet_api/cmd/task_manager/internal/repository/mongo"
 	"task_managemet_api/cmd/task_manager/pkg/db"
 
 	"context"
 	"log"
-
-	"task_managemet_api/cmd/task_manager/cmd/bootstrap"
 )
 
 func main() {
@@ -21,8 +20,10 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+	taskRepo := mongo.NewMongoTaskRepository(client)
+	userRepo := mongo.NewMongoUserRepository(client)
 
-	router := bootstrap.GetRouter(client)
+	router := bootstrap.GetRouter(taskRepo, userRepo)
 
 	http.ListenAndServe(":8080", router)
 }
