@@ -9,42 +9,42 @@ This repository is built in adherence to clean architecture principles. By follo
 folder structure
 
 task_manager_v2/<br/>
-├── cmd/
-│   └── taskmanager/
-│       └── main.go
-├── configs/
-│   └── config.yaml
-|   └── get_env.go
-├── internal/
-│   ├── domain/
-│   │   ├── task.go
-│   │   └── user.go
-│   ├── repository/
-│   │   ├── task_repository.go
-│   │   └── user_repository.go
-│   ├── usecase/
-│   │   ├── task_usecase.go
-│   │   └── user_usecase.go
-│   ├── delivery/
-│   │   ├── http/
-│   │   │   ├── task_handler.go
-│   │   │   └── user_handler.go
-│   │   └── middleware/
-│   │       └── auth_middleware.go
-├── pkg/
-│   ├── db/
-│   │   └── mongo.go
-│   └── security/
-│       └── tokens.go
-|       └── password_encryption.go
-|       └── extract.go
-|   └── validation/
-|       └── user_validation.go
-└── go.mod
+├── cmd//<br/>
+│   └── taskmanager//<br/>
+│       └── main.go/<br/>
+├── configs//<br/>
+│   └── config.yaml/<br/>
+|   └── get_env.go/<br/>
+├── internal//<br/>
+│   ├── domain//<br/>
+│   │   ├── task.go/<br/>
+│   │   └── user.go/<br/>
+│   ├── repository//<br/>
+│   │   ├── task_repository.go/<br/>
+│   │   └── user_repository.go/<br/>
+│   ├── usecase//<br/>
+│   │   ├── task_usecase.go/<br/>
+│   │   └── user_usecase.go/<br/>
+│   ├── delivery//<br/>
+│   │   ├── http//<br/>
+│   │   │   ├── task_handler.go/<br/>
+│   │   │   └── user_handler.go/<br/>
+│   │   └── middleware//<br/>
+│   │       └── auth_middleware.go/<br/>
+├── pkg//<br/>
+│   ├── db//<br/>
+│   │   └── mongo.go/<br/>
+│   └── security//<br/>
+│       └── tokens.go/<br/>
+|       └── password_encryption.go/<br/>
+|       └── extract.go/<br/>
+|   └── validation//<br/>
+|       └── user_validation.go/<br/>
+└── go.mod/<br/>
 |
-└── go.sum
+└── go.sum/<br/>
 |
-└── Reasme.md
+└── Reasme.md/<br/>
 
 
 
