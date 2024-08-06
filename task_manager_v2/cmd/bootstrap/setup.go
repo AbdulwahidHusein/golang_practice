@@ -7,22 +7,18 @@ import (
 	"task_managemet_api/cmd/task_manager/internal/usecase"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetRouter(client *mongo.Client) *gin.Engine {
+func GetRouter(taskRepo repository.TaskRepository, userRepo repository.UserRepository) *gin.Engine {
 	router := gin.Default()
-	taskRepository := repository.NewTaskService(client)
-	taskUsecase := usecase.NewTaskUseCase(taskRepository)
+
+	taskUsecase := usecase.NewTaskUseCase(taskRepo)
 	taskHandler := http.NewTaskHandler(taskUsecase)
 	routes.RegisterTaskRoutes(router, taskHandler)
 
-	userRepository := repository.NewUserServices(client)
-	userUsecase := usecase.NEwUserUSecase(userRepository)
+	userUsecase := usecase.NEwUserUSecase(userRepo)
 	userHandler := http.NewUserHandler(userUsecase)
-
 	routes.RegisterUserRoutes(router, userHandler)
 
 	return router
-
 }
