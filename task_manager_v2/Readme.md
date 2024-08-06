@@ -8,7 +8,7 @@ The API also includes endpoints for user authentication and authorization using 
 This repository is built in adherence to clean architecture principles. By following these principles, the codebase is structured to promote separation of concerns, making it more manageable and easily scalable. The clean architecture ensures that the business logic is independent of the framework, UI, or external agencies, allowing for flexibility in adapting to changing requirements and facilitating easier testing and maintenance.
 folder structure
 
-task_manager_v2/
+task_manager_v2/<br/>
 ├── cmd/
 │   └── taskmanager/
 │       └── main.go
