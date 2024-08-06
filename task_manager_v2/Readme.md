@@ -14,7 +14,7 @@ git clone https://github.com/abdulwahidHussein/golang_practice.git
 
 ```
 cd task_manager_api
-cd task_manager_api
+cd task_manager_api_v2/cmd/task_manager
 ```
 
 ## Install dependencies:

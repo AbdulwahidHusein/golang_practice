@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"task_managemet_api/cmd/task_manager/internal/domain"
-	"task_managemet_api/cmd/task_manager/utils"
+	"task_managemet_api/cmd/task_manager/pkg/security"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -32,7 +32,7 @@ func NewTaskHandler(taskUsecase TaskUsecase) *TaskHandler {
 
 func (c *TaskHandler) CreateTask(ctx *gin.Context) {
 	task := domain.Task{}
-	userId, err1 := utils.GetUSerIdFormToken(ctx)
+	userId, err1 := security.GetUSerIdFormToken(ctx)
 	if err1 != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
 		return
@@ -51,7 +51,7 @@ func (c *TaskHandler) CreateTask(ctx *gin.Context) {
 }
 
 func (c *TaskHandler) GetTasks(ctx *gin.Context) {
-	userId, err := utils.GetUSerIdFormToken(ctx)
+	userId, err := security.GetUSerIdFormToken(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -66,7 +66,7 @@ func (c *TaskHandler) GetTasks(ctx *gin.Context) {
 }
 
 func (c *TaskHandler) GetTask(ctx *gin.Context) {
-	userId, err := utils.GetUSerIdFormToken(ctx)
+	userId, err := security.GetUSerIdFormToken(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -93,7 +93,7 @@ func (c *TaskHandler) UpdateTask(ctx *gin.Context) {
 		return
 	}
 	ModifiedTask := domain.Task{}
-	userId, err1 := utils.GetUSerIdFormToken(ctx)
+	userId, err1 := security.GetUSerIdFormToken(ctx)
 
 	if err1 != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
@@ -126,7 +126,7 @@ func (c *TaskHandler) UpdateTask(ctx *gin.Context) {
 
 func (c *TaskHandler) DeleteTask(ctx *gin.Context) {
 	taskId := ctx.Param("id")
-	userId, err1 := utils.GetUSerIdFormToken(ctx)
+	userId, err1 := security.GetUSerIdFormToken(ctx)
 	if err1 != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
 		return
@@ -150,7 +150,7 @@ func (c *TaskHandler) DeleteTask(ctx *gin.Context) {
 }
 
 func (c *TaskHandler) GetDoneTasks(ctx *gin.Context) {
-	userID, err := utils.GetUSerIdFormToken(ctx)
+	userID, err := security.GetUSerIdFormToken(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -164,7 +164,7 @@ func (c *TaskHandler) GetDoneTasks(ctx *gin.Context) {
 }
 
 func (c *TaskHandler) GetUndoneTasks(ctx *gin.Context) {
-	userId, err := utils.GetUSerIdFormToken(ctx)
+	userId, err := security.GetUSerIdFormToken(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

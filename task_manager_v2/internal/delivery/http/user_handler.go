@@ -3,11 +3,9 @@ package http
 import (
 	"net/http"
 	"task_managemet_api/cmd/task_manager/internal/domain"
-
 	"task_managemet_api/cmd/task_manager/pkg/security"
-	"task_managemet_api/cmd/task_manager/pkg/validation"
 
-	"task_managemet_api/cmd/task_manager/utils"
+	"task_managemet_api/cmd/task_manager/pkg/validation"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -84,7 +82,7 @@ func (u *UserHandler) LoginUser(c *gin.Context) {
 
 func (u *UserHandler) UpdateUser(c *gin.Context) {
 	var user domain.User
-	visitorId, err1 := utils.GetUSerIdFormToken(c)
+	visitorId, err1 := security.GetUSerIdFormToken(c)
 	if err1 != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
 		return
@@ -102,7 +100,7 @@ func (u *UserHandler) UpdateUser(c *gin.Context) {
 
 func (u *UserHandler) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
-	visitorId, err := utils.GetUSerIdFormToken(c)
+	visitorId, err := security.GetUSerIdFormToken(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -125,7 +123,7 @@ func (u *UserHandler) DeleteUser(c *gin.Context) {
 }
 
 func (u *UserHandler) GetUser(c *gin.Context) {
-	userId, err := utils.GetUSerIdFormToken(c)
+	userId, err := security.GetUSerIdFormToken(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
