@@ -1,4 +1,4 @@
-package config
+package db
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func DBConnection() (*mongo.Client, error) {
+func ConnectToMongo() (*mongo.Client, error) {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}

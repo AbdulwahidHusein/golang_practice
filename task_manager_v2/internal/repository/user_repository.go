@@ -1,8 +1,8 @@
-package services
+package repository
 
 import (
 	"context"
-	"task_management_api/models"
+	"task_managemet_api/cmd/task_manager/internal/domain"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,7 +18,7 @@ func NewUserServices(client *mongo.Client) *UserServices {
 	return &UserServices{user_collection}
 }
 
-func (u *UserServices) AddUser(user *models.User) error {
+func (u *UserServices) AddUser(user *domain.User) error {
 	user.ID = primitive.NewObjectID()
 	_, err := u.user_collection.InsertOne(context.TODO(), user)
 	if err != nil {
@@ -36,7 +36,7 @@ func (u *UserServices) DeleteUser(id primitive.ObjectID) error {
 	return nil
 }
 
-func (u *UserServices) UpdateUser(id primitive.ObjectID, user *models.User) error {
+func (u *UserServices) UpdateUser(id primitive.ObjectID, user *domain.User) error {
 
 	_, err := u.user_collection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": user})
 	if err != nil {
@@ -45,9 +45,9 @@ func (u *UserServices) UpdateUser(id primitive.ObjectID, user *models.User) erro
 	return nil
 }
 
-func (u *UserServices) GetUser(id primitive.ObjectID) (*models.User, error) {
+func (u *UserServices) GetUser(id primitive.ObjectID) (*domain.User, error) {
 
-	var user models.User
+	var user domain.User
 	err := u.user_collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 	if err != nil {
 		return nil, err
@@ -55,9 +55,9 @@ func (u *UserServices) GetUser(id primitive.ObjectID) (*models.User, error) {
 	return &user, nil
 }
 
-func (u *UserServices) LoginUser(email string) (*models.User, error) {
+func (u *UserServices) LoginUser(email string) (*domain.User, error) {
 
-	var user models.User
+	var user domain.User
 	err := u.user_collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		return nil, err
@@ -65,9 +65,9 @@ func (u *UserServices) LoginUser(email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (u *UserServices) CheckUser(email string) (*models.User, error) {
+func (u *UserServices) CheckUser(email string) (*domain.User, error) {
 
-	var user models.User
+	var user domain.User
 	err := u.user_collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		return nil, err

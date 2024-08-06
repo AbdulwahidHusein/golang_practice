@@ -1,7 +1,7 @@
-package services
+package repository
 
 import (
-	"task_management_api/models"
+	"task_managemet_api/cmd/task_manager/internal/domain"
 
 	"context"
 
@@ -19,7 +19,7 @@ func NewTaskService(client *mongo.Client) *TaskService {
 	return &TaskService{task_collection}
 }
 
-func (s *TaskService) AddTask(task *models.Task) error {
+func (s *TaskService) AddTask(task *domain.Task) error {
 	task.ID = primitive.NewObjectID()
 	_, err := s.task_collection.InsertOne(context.TODO(), task)
 	if err != nil {
@@ -28,15 +28,15 @@ func (s *TaskService) AddTask(task *models.Task) error {
 	return nil
 }
 
-func (s *TaskService) GetTasks(userId primitive.ObjectID) ([]*models.Task, error) {
-	var tasks []*models.Task
+func (s *TaskService) GetTasks(userId primitive.ObjectID) ([]*domain.Task, error) {
+	var tasks []*domain.Task
 
 	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"user_id": userId})
 	if err != nil {
 		return nil, err
 	}
 	for cursor.Next(context.TODO()) {
-		var task models.Task
+		var task domain.Task
 		err := cursor.Decode(&task)
 		if err != nil {
 			return nil, err
@@ -46,8 +46,8 @@ func (s *TaskService) GetTasks(userId primitive.ObjectID) ([]*models.Task, error
 	return tasks, nil
 }
 
-func (s *TaskService) GetTask(id string) (*models.Task, error) {
-	var task models.Task
+func (s *TaskService) GetTask(id string) (*domain.Task, error) {
+	var task domain.Task
 	oid, _ := primitive.ObjectIDFromHex(id)
 	err := s.task_collection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&task)
 	if err != nil {
@@ -56,7 +56,7 @@ func (s *TaskService) GetTask(id string) (*models.Task, error) {
 	return &task, nil
 }
 
-func (s *TaskService) UpdateTask(task *models.Task) error {
+func (s *TaskService) UpdateTask(task *domain.Task) error {
 	id := task.ID
 
 	updateFields := bson.M{}
@@ -96,15 +96,15 @@ func (s *TaskService) DeleteTask(id string) error {
 	return nil
 }
 
-func (s *TaskService) GetDoneTasks(userId primitive.ObjectID) ([]*models.Task, error) {
-	var tasks []*models.Task
+func (s *TaskService) GetDoneTasks(userId primitive.ObjectID) ([]*domain.Task, error) {
+	var tasks []*domain.Task
 
 	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"status": "done", "user_id": userId})
 	if err != nil {
 		return nil, err
 	}
 	for cursor.Next(context.TODO()) {
-		var task models.Task
+		var task domain.Task
 		err := cursor.Decode(&task)
 		if err != nil {
 			return nil, err
@@ -114,14 +114,14 @@ func (s *TaskService) GetDoneTasks(userId primitive.ObjectID) ([]*models.Task, e
 	return tasks, nil
 }
 
-func (s *TaskService) GetUndoneTasks(userId primitive.ObjectID) ([]*models.Task, error) {
-	var tasks []*models.Task
+func (s *TaskService) GetUndoneTasks(userId primitive.ObjectID) ([]*domain.Task, error) {
+	var tasks []*domain.Task
 	cursor, err := s.task_collection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": "done"}, "user_id": userId})
 	if err != nil {
 		return nil, err
 	}
 	for cursor.Next(context.TODO()) {
-		var task models.Task
+		var task domain.Task
 		err := cursor.Decode(&task)
 		if err != nil {
 			return nil, err

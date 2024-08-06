@@ -1,35 +1,37 @@
-package controllers
+package http
 
 import (
 	"encoding/json"
 	"net/http"
-	"task_management_api/models"
-	"task_management_api/utils"
+	"task_managemet_api/cmd/task_manager/internal/domain"
+	"task_managemet_api/cmd/task_manager/utils"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type TaskDbOperator interface {
-	AddTask(task *models.Task) error
-	GetTasks(userId primitive.ObjectID) ([]*models.Task, error)
-	GetTask(id string) (*models.Task, error)
-	UpdateTask(task *models.Task) error
+type TaskUsecase interface {
+	AddTask(task *domain.Task) error
+	GetTasks(userId primitive.ObjectID) ([]*domain.Task, error)
+	GetTask(id string) (*domain.Task, error)
+	UpdateTask(task *domain.Task) error
 	DeleteTask(id string) error
-	GetDoneTasks(primitive.ObjectID) ([]*models.Task, error)
-	GetUndoneTasks(userId primitive.ObjectID) ([]*models.Task, error)
+	GetDoneTasks(userId primitive.ObjectID) ([]*domain.Task, error)
+	GetUndoneTasks(userId primitive.ObjectID) ([]*domain.Task, error)
 }
 
-type TaskController struct {
-	taskService TaskDbOperator
+type TaskHandler struct {
+	TaskUsecase TaskUsecase
 }
 
-func NewTaskController(service TaskDbOperator) *TaskController {
-	return &TaskController{service}
+func NewTaskHandler(taskUsecase TaskUsecase) *TaskHandler {
+	return &TaskHandler{
+		TaskUsecase: taskUsecase,
+	}
 }
 
-func (c *TaskController) CreateTask(ctx *gin.Context) {
-	task := models.Task{}
+func (c *TaskHandler) CreateTask(ctx *gin.Context) {
+	task := domain.Task{}
 	userId, err1 := utils.GetUSerIdFormToken(ctx)
 	if err1 != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
@@ -40,7 +42,7 @@ func (c *TaskController) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := c.taskService.AddTask(&task)
+	err := c.TaskUsecase.AddTask(&task)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -48,13 +50,13 @@ func (c *TaskController) CreateTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, task)
 }
 
-func (c *TaskController) GetTasks(ctx *gin.Context) {
+func (c *TaskHandler) GetTasks(ctx *gin.Context) {
 	userId, err := utils.GetUSerIdFormToken(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	tasks, err := c.taskService.GetTasks(userId)
+	tasks, err := c.TaskUsecase.GetTasks(userId)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -63,14 +65,14 @@ func (c *TaskController) GetTasks(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tasks)
 }
 
-func (c *TaskController) GetTask(ctx *gin.Context) {
+func (c *TaskHandler) GetTask(ctx *gin.Context) {
 	userId, err := utils.GetUSerIdFormToken(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	taskId := ctx.Param("id")
-	task, err := c.taskService.GetTask(taskId)
+	task, err := c.TaskUsecase.GetTask(taskId)
 
 	if task.UserId != userId {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "task not found"})
@@ -82,15 +84,15 @@ func (c *TaskController) GetTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, task)
 }
 
-func (c *TaskController) UpdateTask(ctx *gin.Context) {
+func (c *TaskHandler) UpdateTask(ctx *gin.Context) {
 	taskId := ctx.Param("id")
 
-	taskWithId, err := c.taskService.GetTask(taskId)
+	taskWithId, err := c.TaskUsecase.GetTask(taskId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "task not found"})
 		return
 	}
-	ModifiedTask := models.Task{}
+	ModifiedTask := domain.Task{}
 	userId, err1 := utils.GetUSerIdFormToken(ctx)
 
 	if err1 != nil {
@@ -113,7 +115,7 @@ func (c *TaskController) UpdateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "You dont have permission to update this task"})
 		return
 	}
-	err3 := c.taskService.UpdateTask(&ModifiedTask)
+	err3 := c.TaskUsecase.UpdateTask(&ModifiedTask)
 
 	if err3 != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err3.Error()})
@@ -122,14 +124,14 @@ func (c *TaskController) UpdateTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ModifiedTask)
 }
 
-func (c *TaskController) DeleteTask(ctx *gin.Context) {
+func (c *TaskHandler) DeleteTask(ctx *gin.Context) {
 	taskId := ctx.Param("id")
 	userId, err1 := utils.GetUSerIdFormToken(ctx)
 	if err1 != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
 		return
 	}
-	task, err2 := c.taskService.GetTask(taskId)
+	task, err2 := c.TaskUsecase.GetTask(taskId)
 	if err2 != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err2.Error()})
 		return
@@ -139,7 +141,7 @@ func (c *TaskController) DeleteTask(ctx *gin.Context) {
 		return
 	}
 
-	err := c.taskService.DeleteTask(taskId)
+	err := c.TaskUsecase.DeleteTask(taskId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -147,13 +149,13 @@ func (c *TaskController) DeleteTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
 }
 
-func (c *TaskController) GetDoneTasks(ctx *gin.Context) {
+func (c *TaskHandler) GetDoneTasks(ctx *gin.Context) {
 	userID, err := utils.GetUSerIdFormToken(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	tasks, err := c.taskService.GetDoneTasks(userID)
+	tasks, err := c.TaskUsecase.GetDoneTasks(userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -161,13 +163,13 @@ func (c *TaskController) GetDoneTasks(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tasks)
 }
 
-func (c *TaskController) GetUndoneTasks(ctx *gin.Context) {
+func (c *TaskHandler) GetUndoneTasks(ctx *gin.Context) {
 	userId, err := utils.GetUSerIdFormToken(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	tasks, err := c.taskService.GetUndoneTasks(userId)
+	tasks, err := c.TaskUsecase.GetUndoneTasks(userId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

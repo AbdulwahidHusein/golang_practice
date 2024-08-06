@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"strings"
-	"task_management_api/auth"
+	"task_managemet_api/cmd/task_manager/pkg/security"
 
 	"fmt"
 
@@ -27,7 +27,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		claims, err := auth.VerifyToken(authParts[1])
+		claims, err := security.VerifyToken(authParts[1])
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			c.Abort()
