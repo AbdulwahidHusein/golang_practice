@@ -1,7 +1,51 @@
 
 ### Task Manager API
 
-This repository contains the source code for a Task Manager API built using the Go programming language and the Gin web framework. The API provides endpoints to manage tasks, including creating, retrieving, updating, and deleting tasks. The tasks are stored in a MongoDB database.
+This repository contains the source code for a Task Manager API built using the Go programming language and the Gin web framework. The API provides endpoints for managing tasks, including creating, retrieving, updating, and deleting tasks, with the data stored in a MongoDB database.
+
+The API also includes endpoints for user authentication and authorization using JWT, ensuring that users can securely perform CRUD operations on their own tasks.
+
+This repository is built in adherence to clean architecture principles. By following these principles, the codebase is structured to promote separation of concerns, making it more manageable and easily scalable. The clean architecture ensures that the business logic is independent of the framework, UI, or external agencies, allowing for flexibility in adapting to changing requirements and facilitating easier testing and maintenance.
+folder structure
+
+task_manager_v2/
+├── cmd/
+│   └── taskmanager/
+│       └── main.go
+├── configs/
+│   └── config.yaml
+|   └── get_env.go
+├── internal/
+│   ├── domain/
+│   │   ├── task.go
+│   │   └── user.go
+│   ├── repository/
+│   │   ├── task_repository.go
+│   │   └── user_repository.go
+│   ├── usecase/
+│   │   ├── task_usecase.go
+│   │   └── user_usecase.go
+│   ├── delivery/
+│   │   ├── http/
+│   │   │   ├── task_handler.go
+│   │   │   └── user_handler.go
+│   │   └── middleware/
+│   │       └── auth_middleware.go
+├── pkg/
+│   ├── db/
+│   │   └── mongo.go
+│   └── security/
+│       └── tokens.go
+|       └── password_encryption.go
+|       └── extract.go
+|   └── validation/
+|       └── user_validation.go
+└── go.mod
+|
+└── go.sum
+|
+└── Reasme.md
+
 
 
 ### Installation
