@@ -40,11 +40,11 @@ task_manager_v2/<br/>
 |       └── extract.go/<br/>
 |   └── validation//<br/>
 |       └── user_validation.go/<br/>
-└── go.mod/<br/>
+├── go.mod/<br/>
 |
-└── go.sum/<br/>
+├── go.sum/<br/>
 |
-└── Reasme.md/<br/>
+├── Readme.md/<br/>
 
 
 
