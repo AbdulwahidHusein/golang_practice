@@ -79,7 +79,7 @@ func (u *UserHandler) DeleteUser(c *gin.Context) {
 	}
 	userId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 	err = u.UserUseCase.DeleteUser(deleterID, userId)
@@ -138,9 +138,9 @@ func (u *UserHandler) CreateAdmin(c *gin.Context) {
 	var user domain.User
 	c.ShouldBindJSON(&user)
 	user.Role = "admin"
-	err := u.UserUseCase.AddUser(&user)
+	err := u.UserUseCase.CreateAdmin(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})

@@ -24,18 +24,23 @@ func GetMongoURI() string {
 	return MongoURI
 }
 
-func GetTokenExpiry() int {
+func GetTokenExpiry() (int, int) {
 
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}
-	tokenExpiry := os.Getenv("TOKEN_EXPIRY")
+	AcessExpiry := os.Getenv("ACCESSES_TOKEN_EXPIRY")
+	RefreshExpiry := os.Getenv("REFRESH_TOKEN_EXPIRY")
 
-	tokenExpiryInt, err := strconv.Atoi(tokenExpiry)
+	accessesExpiryInt, err := strconv.Atoi(AcessExpiry)
+	if err != nil {
+		accessesExpiryInt = 24 // default to 24 hours if TOKEN_EXPIRY is not set or invalid
+	}
+	refteshExpiryInt, err := strconv.Atoi(RefreshExpiry)
 
 	if err != nil {
-		tokenExpiryInt = 24 // default to 24 hours if TOKEN_EXPIRY is not set or invalid
+		refteshExpiryInt = 48
 	}
 
-	return tokenExpiryInt
+	return (accessesExpiryInt), (refteshExpiryInt)
 }

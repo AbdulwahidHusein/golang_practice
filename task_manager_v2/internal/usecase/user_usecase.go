@@ -72,6 +72,10 @@ func (u UserUsecase) UpdateUser(id primitive.ObjectID, user *domain.User) *domai
 	}
 	user.ID = id
 	user.Role = DbUser.Role
+	user.Isactivated = DbUser.Isactivated
+	user.CreatedAt = DbUser.CreatedAt
+	user.Email = DbUser.Email
+	user.Password = DbUser.Password
 	return u.userRepository.UpdateUser(id, user)
 }
 
@@ -101,7 +105,7 @@ func (u UserUsecase) DeactivateUser(userID primitive.ObjectID) (*domain.User, er
 	if err != nil {
 		return nil, err
 	}
-	user.Isactivated = true
+	user.Isactivated = false
 	return u.userRepository.UpdateUser(user.ID, user), nil
 }
 
@@ -110,7 +114,7 @@ func (u UserUsecase) ActivateUser(id primitive.ObjectID) (*domain.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	user.Isactivated = false
+	user.Isactivated = true
 	return u.userRepository.UpdateUser(user.ID, user), nil
 }
 

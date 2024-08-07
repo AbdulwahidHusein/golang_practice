@@ -16,12 +16,12 @@ func CreateToken(userId, role, email string) (string, string, error) {
 	if len(secretKey) == 0 {
 		log.Fatal("SECRET_KEY not set in .env file")
 	}
-	tokenExpiryInt := config.GetTokenExpiry()
+	accessExpiry, RefreshExpiry := config.GetTokenExpiry()
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": userId,
 		"role":   role,
 		"email":  email,
-		"exp":    time.Now().Add(time.Hour * time.Duration(tokenExpiryInt)).Unix(),
+		"exp":    time.Now().Add(time.Hour * time.Duration(accessExpiry)).Unix(),
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(secretKey))
@@ -33,7 +33,7 @@ func CreateToken(userId, role, email string) (string, string, error) {
 		"userId": userId,
 		"role":   role,
 		"email":  email,
-		"exp":    time.Now().Add(time.Hour * time.Duration(tokenExpiryInt+24)).Unix(),
+		"exp":    time.Now().Add(time.Hour * time.Duration(RefreshExpiry)).Unix(),
 	})
 	refreshTokenString, err := refreshToken.SignedString([]byte(secretKey))
 	if err != nil {
