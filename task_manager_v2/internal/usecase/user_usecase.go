@@ -4,6 +4,7 @@ import (
 	"context"
 	"task_managemet_api/cmd/task_manager/internal/domain"
 	"task_managemet_api/cmd/task_manager/pkg/security"
+	"time"
 
 	"task_managemet_api/cmd/task_manager/internal/repository"
 
@@ -31,15 +32,25 @@ func (u UserUsecase) AddUser(user *domain.User) error {
 	if !validation.IsValidPassword(user.Password) {
 		return errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
 	}
+	usr, err := u.userRepository.GetUserByEmail(user.Email)
+	if usr != nil {
+		return errors.New("user with this email already exists")
+	}
+	if err != nil {
+		return err
+	}
+
 	hashedPassword, _ := security.EncryptPassword(user.Password)
 	user.Password = hashedPassword
 	user.Isactivated = false
 
-	if isdbemp, _ := u.userRepository.IsEmptyCollection(context.Background()); !isdbemp {
+	if isdbemp, _ := u.userRepository.IsEmptyCollection(context.Background()); isdbemp {
 		user.Role = "admin"
 	} else {
 		user.Role = "user"
 	}
+	user.CreatedAt = time.Now()
+
 	return u.userRepository.AddUser(user)
 }
 
@@ -77,7 +88,7 @@ func (u UserUsecase) LoginUser(email string, password string) (string, string, e
 	if err := security.ComparePassword(hashedPassword, password); err != nil {
 		return "", "", err
 	}
-	accessTokenString, refreshTokenString, err := security.CreateToken(realUser.ID.Hex(), realUser.Role)
+	accessTokenString, refreshTokenString, err := security.CreateToken(realUser.ID.Hex(), realUser.Role, realUser.Email)
 	if err != nil {
 		return "", "", err
 	}
@@ -85,8 +96,8 @@ func (u UserUsecase) LoginUser(email string, password string) (string, string, e
 
 }
 
-func (u UserUsecase) ApproveUser(iserID primitive.ObjectID) (*domain.User, error) {
-	user, err := u.userRepository.GetUSerById(iserID)
+func (u UserUsecase) DeactivateUser(userID primitive.ObjectID) (*domain.User, error) {
+	user, err := u.userRepository.GetUSerById(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +105,7 @@ func (u UserUsecase) ApproveUser(iserID primitive.ObjectID) (*domain.User, error
 	return u.userRepository.UpdateUser(user.ID, user), nil
 }
 
-func (u UserUsecase) DisApproveUser(id primitive.ObjectID) (*domain.User, error) {
+func (u UserUsecase) ActivateUser(id primitive.ObjectID) (*domain.User, error) {
 	user, err := u.userRepository.GetUSerById(id)
 	if err != nil {
 		return nil, err
@@ -110,6 +121,14 @@ func (u UserUsecase) CreateAdmin(user *domain.User) error {
 	if !validation.IsValidPassword(user.Password) {
 		return errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
 	}
+	usr, err := u.userRepository.GetUserByEmail(user.Email)
+	if usr != nil {
+		return errors.New("user with this email already exists")
+	}
+	if err != nil {
+		return err
+	}
+
 	hashedPassword, _ := security.EncryptPassword(user.Password)
 	user.Password = hashedPassword
 	user.Isactivated = true

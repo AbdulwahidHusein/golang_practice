@@ -16,8 +16,8 @@ type UserUseCase interface {
 	UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User
 	GetUser(id primitive.ObjectID) (*domain.User, error)
 	LoginUser(email string, password string) (string, string, error)
-	ApproveUser(id primitive.ObjectID) (*domain.User, error)
-	DisApproveUser(id primitive.ObjectID) (*domain.User, error)
+	ActivateUser(id primitive.ObjectID) (*domain.User, error)
+	DeactivateUser(id primitive.ObjectID) (*domain.User, error)
 }
 
 type UserHandler struct {
@@ -34,9 +34,9 @@ func (u *UserHandler) AddUser(c *gin.Context) {
 	var user domain.User
 	c.ShouldBindJSON(&user)
 
-	updated := u.UserUseCase.AddUser(&user)
-	if updated == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add user"})
+	err := u.UserUseCase.AddUser(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
@@ -111,7 +111,7 @@ func (u *UserHandler) ApproveUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
-	user, err1 := u.UserUseCase.ApproveUser(userIdObj)
+	user, err1 := u.UserUseCase.ActivateUser(userIdObj)
 	if err1 != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err1.Error()})
 		return
@@ -126,7 +126,7 @@ func (u *UserHandler) DisApproveUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
-	user, err1 := u.UserUseCase.ApproveUser(userIdObj)
+	user, err1 := u.UserUseCase.DeactivateUser(userIdObj)
 	if err1 != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err1.Error()})
 		return
@@ -138,8 +138,8 @@ func (u *UserHandler) CreateAdmin(c *gin.Context) {
 	var user domain.User
 	c.ShouldBindJSON(&user)
 	user.Role = "admin"
-	updated := u.UserUseCase.AddUser(&user)
-	if updated == nil {
+	err := u.UserUseCase.AddUser(&user)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add user"})
 		return
 	}
