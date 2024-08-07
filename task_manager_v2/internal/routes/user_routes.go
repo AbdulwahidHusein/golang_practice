@@ -18,4 +18,9 @@ func RegisterUserRoutes(router *gin.Engine, userController *http.UserHandler) {
 	r.DELETE("/user", userController.DeleteUser, middleware.AuthMiddleware())
 	r.GET("/user", userController.GetUser, middleware.AuthMiddleware())
 	r.POST("/refresh", security.RefreshTokenHandler, middleware.AuthMiddleware())
+
+	admin := router.Group("/admin", middleware.AuthMiddleware())
+	admin.PUT("/approve", userController.ApproveUser)
+	admin.PUT("/disapprove", userController.DisApproveUser)
+	admin.POST("create-admin", userController.CreateAdmin)
 }

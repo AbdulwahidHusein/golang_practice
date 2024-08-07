@@ -9,13 +9,18 @@ import (
 )
 
 func RegisterTaskRoutes(router *gin.Engine, taskController *http.TaskHandler) {
-	taskroute := router.Group("/", middleware.AuthMiddleware())
+	authOnly := router.Group("/", middleware.AuthMiddleware())
+	authOnly.GET("/tasks", taskController.GetTasks)
+	authOnly.GET("/tasks/done", taskController.GetDoneTasks)
+	authOnly.GET("/tasks/undone", taskController.GetUndoneTasks)
+	authOnly.GET("/tasks/:id", taskController.GetTask)
 
-	taskroute.GET("/tasks", taskController.GetTasks)
-	taskroute.GET("/tasks/:id", taskController.GetTask)
-	taskroute.PUT("/tasks/:id", taskController.UpdateTask)
-	taskroute.POST("/tasks", taskController.CreateTask)
-	taskroute.DELETE("/tasks/:id", taskController.DeleteTask)
-	taskroute.GET("/tasks/done", taskController.GetDoneTasks)
-	taskroute.GET("/tasks/undone", taskController.GetUndoneTasks)
+	adminOnly := router.Group("/admin", middleware.AuthMiddleware(), middleware.ISAdminMiddleWare())
+	adminOnly.GET("/tasks", taskController.GetTasks)
+	adminOnly.GET("/tasks/:id", taskController.GetTask)
+	adminOnly.PUT("/tasks/:id", taskController.UpdateTask)
+	adminOnly.POST("/tasks", taskController.CreateTask)
+	adminOnly.DELETE("/tasks/:id", taskController.DeleteTask)
+	adminOnly.GET("/tasks/done", taskController.GetDoneTasks)
+	adminOnly.GET("/tasks/undone", taskController.GetUndoneTasks)
 }

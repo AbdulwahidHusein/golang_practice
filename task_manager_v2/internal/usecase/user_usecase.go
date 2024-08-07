@@ -1,50 +1,118 @@
 package usecase
 
 import (
+	"context"
 	"task_managemet_api/cmd/task_manager/internal/domain"
+	"task_managemet_api/cmd/task_manager/pkg/security"
+
+	"task_managemet_api/cmd/task_manager/internal/repository"
+
+	"task_managemet_api/cmd/task_manager/pkg/validation"
+
+	"errors"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type UserRepository interface {
-	AddUser(user *domain.User) error
-	DeleteUser(id primitive.ObjectID) error
-	UpdateUser(id primitive.ObjectID, user *domain.User) error
-	GetUser(id primitive.ObjectID) (*domain.User, error)
-	LoginUser(email string) (*domain.User, error)
-	CheckUser(email string) (*domain.User, error)
-}
-
 type UserUsecase struct {
-	userRepository UserRepository
+	userRepository repository.UserRepository
 }
 
-func NEwUserUSecase(userRepository UserRepository) UserUsecase {
+func NEwUserUSecase(userRepository repository.UserRepository) UserUsecase {
 	return UserUsecase{
 		userRepository: userRepository,
 	}
 }
 
 func (u UserUsecase) AddUser(user *domain.User) error {
+	if !validation.IsValidEmail(user.Email) {
+		return errors.New("invalid email format")
+	}
+	if !validation.IsValidPassword(user.Password) {
+		return errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
+	}
+	hashedPassword, _ := security.EncryptPassword(user.Password)
+	user.Password = hashedPassword
+	user.Isactivated = false
+
+	if isdbemp, _ := u.userRepository.IsEmptyCollection(context.Background()); !isdbemp {
+		user.Role = "admin"
+	} else {
+		user.Role = "user"
+	}
 	return u.userRepository.AddUser(user)
 }
 
-func (u UserUsecase) DeleteUser(id primitive.ObjectID) error {
-	return u.userRepository.DeleteUser(id)
+// func (u UserUsecase) AddAdmin(ctx context.Context) (bool, error) {
+
+// }
+
+func (u UserUsecase) DeleteUser(deleterID primitive.ObjectID, tobeDeletedID primitive.ObjectID) error {
+	if deleterID != tobeDeletedID {
+		return errors.New("unauthorized deletion")
+	}
+	return u.userRepository.DeleteUser(deleterID)
 }
 
-func (u UserUsecase) UpdateUser(id primitive.ObjectID, user *domain.User) error {
+func (u UserUsecase) UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User {
+	DbUser, err := u.userRepository.GetUSerById(id)
+	if err != nil {
+		return nil
+	}
+	user.ID = id
+	user.Role = DbUser.Role
 	return u.userRepository.UpdateUser(id, user)
 }
 
 func (u UserUsecase) GetUser(id primitive.ObjectID) (*domain.User, error) {
-	return u.userRepository.GetUser(id)
+	return u.userRepository.GetUSerById(id)
 }
 
-func (u UserUsecase) LoginUser(email string) (*domain.User, error) {
-	return u.userRepository.LoginUser(email)
+func (u UserUsecase) LoginUser(email string, password string) (string, string, error) {
+	realUser, err := u.userRepository.GetUserByEmail(email)
+	if err != nil {
+		return "", "", err
+	}
+	hashedPassword := realUser.Password
+	if err := security.ComparePassword(hashedPassword, password); err != nil {
+		return "", "", err
+	}
+	accessTokenString, refreshTokenString, err := security.CreateToken(realUser.ID.Hex(), realUser.Role)
+	if err != nil {
+		return "", "", err
+	}
+	return accessTokenString, refreshTokenString, nil
+
 }
 
-func (u UserUsecase) CheckUser(email string) (*domain.User, error) {
-	return u.userRepository.CheckUser(email)
+func (u UserUsecase) ApproveUser(iserID primitive.ObjectID) (*domain.User, error) {
+	user, err := u.userRepository.GetUSerById(iserID)
+	if err != nil {
+		return nil, err
+	}
+	user.Isactivated = true
+	return u.userRepository.UpdateUser(user.ID, user), nil
+}
+
+func (u UserUsecase) DisApproveUser(id primitive.ObjectID) (*domain.User, error) {
+	user, err := u.userRepository.GetUSerById(id)
+	if err != nil {
+		return nil, err
+	}
+	user.Isactivated = false
+	return u.userRepository.UpdateUser(user.ID, user), nil
+}
+
+func (u UserUsecase) CreateAdmin(user *domain.User) error {
+	if !validation.IsValidEmail(user.Email) {
+		return errors.New("invalid email format")
+	}
+	if !validation.IsValidPassword(user.Password) {
+		return errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
+	}
+	hashedPassword, _ := security.EncryptPassword(user.Password)
+	user.Password = hashedPassword
+	user.Isactivated = true
+	user.Role = "admin"
+	return u.userRepository.AddUser(user)
 }

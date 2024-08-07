@@ -18,6 +18,14 @@ func NewMongoUserRepository(client *mongo.Client) *MongoUserRepository {
 	return &MongoUserRepository{userCollection}
 }
 
+func (r *MongoUserRepository) IsEmptyCollection(ctx context.Context) (bool, error) {
+	count, err := r.userCollection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return false, err
+	}
+	return count == 0, nil
+}
+
 func (r *MongoUserRepository) AddUser(user *domain.User) error {
 	user.ID = primitive.NewObjectID()
 	_, err := r.userCollection.InsertOne(context.TODO(), user)
@@ -29,24 +37,26 @@ func (r *MongoUserRepository) DeleteUser(id primitive.ObjectID) error {
 	return err
 }
 
-func (r *MongoUserRepository) UpdateUser(id primitive.ObjectID, user *domain.User) error {
+func (r *MongoUserRepository) UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User {
 	_, err := r.userCollection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": user})
-	return err
+	if err != nil {
+		return nil
+	}
+	var updatedUser domain.User
+	err = r.userCollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&updatedUser)
+	if err != nil {
+		return nil
+	}
+	return &updatedUser
 }
 
-func (r *MongoUserRepository) GetUser(id primitive.ObjectID) (*domain.User, error) {
+func (r *MongoUserRepository) GetUSerById(id primitive.ObjectID) (*domain.User, error) {
 	var user domain.User
 	err := r.userCollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 	return &user, err
 }
 
-func (r *MongoUserRepository) LoginUser(email string) (*domain.User, error) {
-	var user domain.User
-	err := r.userCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
-	return &user, err
-}
-
-func (r *MongoUserRepository) CheckUser(email string) (*domain.User, error) {
+func (r *MongoUserRepository) GetUserByEmail(email string) (*domain.User, error) {
 	var user domain.User
 	err := r.userCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 	return &user, err
