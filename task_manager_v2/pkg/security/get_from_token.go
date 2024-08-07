@@ -14,7 +14,7 @@ func GetUSerIdFormToken(c *gin.Context) (primitive.ObjectID, error) {
 	userIdStr := claims.(jwt.MapClaims)["userId"].(string)
 	userId, errr := primitive.ObjectIDFromHex(userIdStr)
 	if errr != nil {
-		return (primitive.ObjectID{}), nil
+		return (primitive.ObjectID{}), errr
 	}
 	return userId, nil
 }

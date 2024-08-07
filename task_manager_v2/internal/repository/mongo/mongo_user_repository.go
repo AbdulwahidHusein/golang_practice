@@ -53,11 +53,25 @@ func (r *MongoUserRepository) UpdateUser(id primitive.ObjectID, user *domain.Use
 func (r *MongoUserRepository) GetUSerById(id primitive.ObjectID) (*domain.User, error) {
 	var user domain.User
 	err := r.userCollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
+
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
 	return &user, err
 }
 
 func (r *MongoUserRepository) GetUserByEmail(email string) (*domain.User, error) {
 	var user domain.User
 	err := r.userCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
-	return &user, err
+
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func CreateToken(userId, email, role string) (string, string, error) {
+func CreateToken(userId, role, email string) (string, string, error) {
 	secretKey := config.GetSecretKey()
 	if len(secretKey) == 0 {
 		log.Fatal("SECRET_KEY not set in .env file")
@@ -32,6 +32,7 @@ func CreateToken(userId, email, role string) (string, string, error) {
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": userId,
 		"role":   role,
+		"email":  email,
 		"exp":    time.Now().Add(time.Hour * time.Duration(tokenExpiryInt+24)).Unix(),
 	})
 	refreshTokenString, err := refreshToken.SignedString([]byte(secretKey))

@@ -48,8 +48,13 @@ func ISAdminMiddleWare() gin.HandlerFunc {
 			return
 		}
 		role, ok := claims.(jwt.MapClaims)["role"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Role not found"})
+			c.Abort()
+			return
+		}
 		if !ok || role != "admin" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden: Admins only"})
+			c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden: Admins only you are ", "role": role})
 			c.Abort()
 			return
 		}
