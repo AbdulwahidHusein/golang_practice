@@ -12,5 +12,4 @@ type Task struct {
 	Description string             `json:"description"`
 	DueDate     time.Time          `json:"due_date"`
 	Status      string             `json:"status"`
-	UserId      primitive.ObjectID `bson:"user_id" json:"user_id"` // Ensure bson tag matches field name in MongoDB
 }

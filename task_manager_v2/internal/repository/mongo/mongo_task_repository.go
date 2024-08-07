@@ -24,9 +24,9 @@ func (r *MongoTaskRepository) AddTask(task *domain.Task) error {
 	return err
 }
 
-func (r *MongoTaskRepository) GetTasks(userId primitive.ObjectID) ([]*domain.Task, error) {
+func (r *MongoTaskRepository) GetAllTasks() ([]*domain.Task, error) {
 	var tasks []*domain.Task
-	cursor, err := r.taskCollection.Find(context.TODO(), bson.M{"user_id": userId})
+	cursor, err := r.taskCollection.Find(context.TODO(), bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (r *MongoTaskRepository) GetTasks(userId primitive.ObjectID) ([]*domain.Tas
 	return tasks, nil
 }
 
-func (r *MongoTaskRepository) GetTask(id string) (*domain.Task, error) {
+func (r *MongoTaskRepository) GetTaskById(id string) (*domain.Task, error) {
 	var task domain.Task
 	oid, _ := primitive.ObjectIDFromHex(id)
 	err := r.taskCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&task)
@@ -55,8 +55,8 @@ func (r *MongoTaskRepository) UpdateTask(task *domain.Task) error {
 		"description": task.Description,
 		"due_date":    task.DueDate,
 		"status":      task.Status,
-		"user_id":     task.UserId,
 	}
+
 	update := bson.M{"$set": updateFields}
 	_, err := r.taskCollection.UpdateOne(context.TODO(), bson.M{"_id": id}, update)
 	return err
@@ -68,9 +68,9 @@ func (r *MongoTaskRepository) DeleteTask(id string) error {
 	return err
 }
 
-func (r *MongoTaskRepository) GetDoneTasks(userId primitive.ObjectID) ([]*domain.Task, error) {
+func (r *MongoTaskRepository) GetDoneTasks() ([]*domain.Task, error) {
 	var tasks []*domain.Task
-	cursor, err := r.taskCollection.Find(context.TODO(), bson.M{"status": "done", "user_id": userId})
+	cursor, err := r.taskCollection.Find(context.TODO(), bson.M{"status": "done"})
 	if err != nil {
 		return nil, err
 	}
@@ -85,9 +85,9 @@ func (r *MongoTaskRepository) GetDoneTasks(userId primitive.ObjectID) ([]*domain
 	return tasks, nil
 }
 
-func (r *MongoTaskRepository) GetUndoneTasks(userId primitive.ObjectID) ([]*domain.Task, error) {
+func (r *MongoTaskRepository) GetUndoneTasks() ([]*domain.Task, error) {
 	var tasks []*domain.Task
-	cursor, err := r.taskCollection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": "done"}, "user_id": userId})
+	cursor, err := r.taskCollection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": "done"}})
 	if err != nil {
 		return nil, err
 	}
