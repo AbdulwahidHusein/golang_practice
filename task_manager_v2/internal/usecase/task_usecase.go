@@ -39,10 +39,12 @@ func (u TaskUsecase) DeleteTask(id string) error {
 	return u.taskRepository.DeleteTask(id)
 }
 
-func (u TaskUsecase) GetDoneTasks() ([]*domain.Task, error) {
-	return u.taskRepository.GetDoneTasks()
-}
-
-func (u TaskUsecase) GetUndoneTasks() ([]*domain.Task, error) {
-	return u.taskRepository.GetUndoneTasks()
+func (u TaskUsecase) GetTaskByStatus(status string) ([]*domain.Task, error) {
+	if status == "" {
+		return u.taskRepository.GetAllTasks()
+	}
+	if status != "undone" && status != "pending" && status != "done" {
+		return nil, nil
+	}
+	return u.taskRepository.GetTasksWithCriteria(map[string]interface{}{"status": status})
 }

@@ -68,36 +68,31 @@ func (r *MongoTaskRepository) DeleteTask(id string) error {
 	return err
 }
 
-func (r *MongoTaskRepository) GetDoneTasks() ([]*domain.Task, error) {
-	var tasks []*domain.Task
-	cursor, err := r.taskCollection.Find(context.TODO(), bson.M{"status": "done"})
-	if err != nil {
-		return nil, err
+func (r *MongoTaskRepository) GetTasksWithCriteria(criteria map[string]interface{}) ([]*domain.Task, error) {
+	filter := bson.M{}
+	for k, v := range criteria {
+		filter[k] = v
 	}
-	for cursor.Next(context.TODO()) {
-		var task domain.Task
-		err := cursor.Decode(&task)
-		if err != nil {
-			return nil, err
-		}
-		tasks = append(tasks, &task)
-	}
-	return tasks, nil
-}
 
-func (r *MongoTaskRepository) GetUndoneTasks() ([]*domain.Task, error) {
 	var tasks []*domain.Task
-	cursor, err := r.taskCollection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": "done"}})
+	cursor, err := r.taskCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(context.TODO())
+
 	for cursor.Next(context.TODO()) {
-		var task domain.Task
+		var task *domain.Task
 		err := cursor.Decode(&task)
 		if err != nil {
 			return nil, err
 		}
-		tasks = append(tasks, &task)
+		tasks = append(tasks, task)
 	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
 	return tasks, nil
 }

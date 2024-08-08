@@ -14,8 +14,7 @@ type TaskUsecase interface {
 	GetTask(id string) (*domain.Task, error)
 	UpdateTask(taskID string, task *domain.Task) error
 	DeleteTask(id string) error
-	GetDoneTasks() ([]*domain.Task, error)
-	GetUndoneTasks() ([]*domain.Task, error)
+	GetTaskByStatus(status string) ([]*domain.Task, error)
 }
 
 type TaskHandler struct {
@@ -91,17 +90,9 @@ func (c *TaskHandler) DeleteTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
 }
 
-func (c *TaskHandler) GetDoneTasks(ctx *gin.Context) {
-	tasks, err := c.TaskUsecase.GetDoneTasks()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, tasks)
-}
-
-func (c *TaskHandler) GetUndoneTasks(ctx *gin.Context) {
-	tasks, err := c.TaskUsecase.GetUndoneTasks()
+func (c *TaskHandler) GetTaskByStatus(ctx *gin.Context) {
+	status := ctx.Param("status")
+	tasks, err := c.TaskUsecase.GetTaskByStatus(status)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -36,10 +36,10 @@ func (u *UserHandler) AddUser(c *gin.Context) {
 
 	err := u.UserUseCase.AddUser(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": user})
+	c.JSON(http.StatusOK, gin.H{"message": "user created successfully", "data": user})
 }
 
 func (u *UserHandler) LoginUser(c *gin.Context) {
@@ -47,24 +47,24 @@ func (u *UserHandler) LoginUser(c *gin.Context) {
 	c.ShouldBindJSON(&guest)
 	accessTokenString, refreshTokenString, err := u.UserUseCase.LoginUser(guest.Email, guest.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"token": []map[string]string{{"access": accessTokenString, "refresh": refreshTokenString}}})
+	c.JSON(http.StatusOK, gin.H{"message": "logged in successfully", "data": []map[string]string{{"access": accessTokenString, "refresh": refreshTokenString}}})
 }
 
 func (u *UserHandler) UpdateUser(c *gin.Context) {
 	var user domain.User
 	userId, err1 := security.GetUSerIdFormToken(c)
 	if err1 != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err1.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occured", "error": err1.Error()})
 		return
 	}
 	c.ShouldBindJSON(&user)
 
 	updated := u.UserUseCase.UpdateUser(userId, &user)
 	if updated == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": "Failed to update user"})
 		return
 	}
 	c.JSON(http.StatusOK, user)
@@ -74,31 +74,31 @@ func (u *UserHandler) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 	deleterID, err := security.GetUSerIdFormToken(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occured", "error": err.Error()})
 		return
 	}
 	userId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occured", "error": err})
 		return
 	}
 	err = u.UserUseCase.DeleteUser(deleterID, userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully", "data": userId})
 }
 
 func (u *UserHandler) GetUser(c *gin.Context) {
 	userId, err := security.GetUSerIdFormToken(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an invalid id", "error": "Invalid user ID"})
 		return
 	}
 	user, err := u.UserUseCase.GetUser(userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, user)
@@ -108,12 +108,12 @@ func (u *UserHandler) ApproveUser(c *gin.Context) {
 	userId := c.Param("id")
 	userIdObj, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid id", "error": "Invalid user ID"})
 		return
 	}
 	user, err1 := u.UserUseCase.ActivateUser(userIdObj)
 	if err1 != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err1.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err1.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User approved successfully", "user": user})
@@ -123,15 +123,15 @@ func (u *UserHandler) DisApproveUser(c *gin.Context) {
 	userId := c.Param("id")
 	userIdObj, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid id", "error": "Invalid user ID"})
 		return
 	}
 	user, err1 := u.UserUseCase.DeactivateUser(userIdObj)
 	if err1 != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err1.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err1.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User approved successfully", "user": user})
+	c.JSON(http.StatusOK, gin.H{"message": "User approved successfully", "data": user})
 }
 
 func (u *UserHandler) CreateAdmin(c *gin.Context) {
@@ -140,7 +140,7 @@ func (u *UserHandler) CreateAdmin(c *gin.Context) {
 	user.Role = "admin"
 	err := u.UserUseCase.CreateAdmin(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})

@@ -10,6 +10,5 @@ type TaskRepository interface {
 	GetTaskById(id string) (*domain.Task, error)
 	UpdateTask(task *domain.Task) error
 	DeleteTask(id string) error
-	GetDoneTasks() ([]*domain.Task, error)
-	GetUndoneTasks() ([]*domain.Task, error)
+	GetTasksWithCriteria(criteria map[string]interface{}) ([]*domain.Task, error)
 }
