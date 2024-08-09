@@ -13,8 +13,8 @@ type MongoTaskRepository struct {
 	taskCollection *mongo.Collection
 }
 
-func NewMongoTaskRepository(client *mongo.Client) *MongoTaskRepository {
-	taskCollection := client.Database("task_manager_db").Collection("tasks")
+func NewMongoTaskRepository(client *mongo.Client, database string, collection string) *MongoTaskRepository {
+	taskCollection := client.Database(database).Collection(collection)
 	return &MongoTaskRepository{taskCollection}
 }
 
