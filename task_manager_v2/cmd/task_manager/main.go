@@ -21,7 +21,7 @@ func main() {
 		}
 	}()
 	taskRepo := mongo.NewMongoTaskRepository(client, "task_manager_db", "tasks")
-	userRepo := mongo.NewMongoUserRepository(client)
+	userRepo := mongo.NewMongoUserRepository(client, "task_manager_db", "users")
 
 	router := bootstrap.GetRouter(taskRepo, userRepo)
 

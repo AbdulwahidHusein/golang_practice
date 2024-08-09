@@ -1,4 +1,4 @@
-package repository
+package tests
 
 import (
 	"context"
@@ -8,6 +8,8 @@ import (
 	"task_managemet_api/cmd/task_manager/config"
 	"task_managemet_api/cmd/task_manager/internal/domain"
 	LocalMongo "task_managemet_api/cmd/task_manager/internal/repository/mongo"
+
+	"task_managemet_api/cmd/task_manager/internal/repository"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -20,7 +22,7 @@ import (
 type MongoTaskRepositoryTestSuite struct {
 	suite.Suite
 	client         *mongo.Client
-	repo           TaskRepository // Use the interface type here
+	repo           repository.TaskRepository // Use the interface type here
 	taskCollection *mongo.Collection
 }
 

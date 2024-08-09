@@ -13,8 +13,8 @@ type MongoUserRepository struct {
 	userCollection *mongo.Collection
 }
 
-func NewMongoUserRepository(client *mongo.Client) *MongoUserRepository {
-	userCollection := client.Database("task_manager_db").Collection("users")
+func NewMongoUserRepository(client *mongo.Client, database string, collection string) *MongoUserRepository {
+	userCollection := client.Database(database).Collection(collection)
 	return &MongoUserRepository{userCollection}
 }
 
@@ -37,17 +37,17 @@ func (r *MongoUserRepository) DeleteUser(id primitive.ObjectID) error {
 	return err
 }
 
-func (r *MongoUserRepository) UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User {
+func (r *MongoUserRepository) UpdateUser(id primitive.ObjectID, user *domain.User) (*domain.User, error) {
 	_, err := r.userCollection.UpdateOne(context.TODO(), bson.M{"_id": id}, bson.M{"$set": user})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	var updatedUser domain.User
 	err = r.userCollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&updatedUser)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return &updatedUser
+	return &updatedUser, nil
 }
 
 func (r *MongoUserRepository) GetUSerById(id primitive.ObjectID) (*domain.User, error) {

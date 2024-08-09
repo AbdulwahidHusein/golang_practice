@@ -11,7 +11,7 @@ type UserRepository interface {
 	AddUser(user *domain.User) error
 	IsEmptyCollection(ctx context.Context) (bool, error)
 	DeleteUser(id primitive.ObjectID) error
-	UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User
+	UpdateUser(id primitive.ObjectID, user *domain.User) (*domain.User, error)
 	GetUSerById(id primitive.ObjectID) (*domain.User, error)
 	GetUserByEmail(email string) (*domain.User, error)
 }

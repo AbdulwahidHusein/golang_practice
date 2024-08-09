@@ -76,7 +76,11 @@ func (u UserUsecase) UpdateUser(id primitive.ObjectID, user *domain.User) *domai
 	user.CreatedAt = DbUser.CreatedAt
 	user.Email = DbUser.Email
 	user.Password = DbUser.Password
-	return u.userRepository.UpdateUser(id, user)
+	user, err1 := u.userRepository.UpdateUser(id, user)
+	if err1 != nil {
+		return nil
+	}
+	return user
 }
 
 func (u UserUsecase) GetUser(id primitive.ObjectID) (*domain.User, error) {
@@ -106,7 +110,11 @@ func (u UserUsecase) DeactivateUser(userID primitive.ObjectID) (*domain.User, er
 		return nil, err
 	}
 	user.Isactivated = false
-	return u.userRepository.UpdateUser(user.ID, user), nil
+	usr, err1 := u.userRepository.UpdateUser(user.ID, user)
+	if err1 != nil {
+		return nil, err1
+	}
+	return usr, nil
 }
 
 func (u UserUsecase) ActivateUser(id primitive.ObjectID) (*domain.User, error) {
@@ -115,7 +123,12 @@ func (u UserUsecase) ActivateUser(id primitive.ObjectID) (*domain.User, error) {
 		return nil, err
 	}
 	user.Isactivated = true
-	return u.userRepository.UpdateUser(user.ID, user), nil
+
+	usr, err1 := u.userRepository.UpdateUser(user.ID, user)
+	if err1 != nil {
+		return nil, err1
+	}
+	return usr, nil
 }
 
 func (u UserUsecase) CreateAdmin(user *domain.User) error {
