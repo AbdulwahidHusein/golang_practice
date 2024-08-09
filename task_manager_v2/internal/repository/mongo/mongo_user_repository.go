@@ -26,10 +26,10 @@ func (r *MongoUserRepository) IsEmptyCollection(ctx context.Context) (bool, erro
 	return count == 0, nil
 }
 
-func (r *MongoUserRepository) AddUser(user *domain.User) error {
+func (r *MongoUserRepository) AddUser(user *domain.User) (*domain.User, error) {
 	user.ID = primitive.NewObjectID()
 	_, err := r.userCollection.InsertOne(context.TODO(), user)
-	return err
+	return user, err
 }
 
 func (r *MongoUserRepository) DeleteUser(id primitive.ObjectID) error {

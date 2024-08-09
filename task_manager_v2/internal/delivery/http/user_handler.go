@@ -5,26 +5,17 @@ import (
 	"task_managemet_api/cmd/task_manager/internal/domain"
 	"task_managemet_api/cmd/task_manager/pkg/security"
 
+	"task_managemet_api/cmd/task_manager/internal/usecase"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type UserUseCase interface {
-	AddUser(user *domain.User) error
-	CreateAdmin(admin *domain.User) error
-	DeleteUser(deleterID primitive.ObjectID, tobeDeletedID primitive.ObjectID) error
-	UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User
-	GetUser(id primitive.ObjectID) (*domain.User, error)
-	LoginUser(email string, password string) (string, string, error)
-	ActivateUser(id primitive.ObjectID) (*domain.User, error)
-	DeactivateUser(id primitive.ObjectID) (*domain.User, error)
-}
-
 type UserHandler struct {
-	UserUseCase UserUseCase
+	UserUseCase usecase.UserUseCaseInterface
 }
 
-func NewUserHandler(userUseCase UserUseCase) *UserHandler {
+func NewUserHandler(userUseCase usecase.UserUseCaseInterface) *UserHandler {
 	return &UserHandler{
 		UserUseCase: userUseCase,
 	}
@@ -34,12 +25,12 @@ func (u *UserHandler) AddUser(c *gin.Context) {
 	var user domain.User
 	c.ShouldBindJSON(&user)
 
-	err := u.UserUseCase.AddUser(&user)
+	usr, err := u.UserUseCase.AddUser(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "user created successfully", "data": user})
+	c.JSON(http.StatusOK, gin.H{"message": "user created successfully", "data": usr})
 }
 
 func (u *UserHandler) LoginUser(c *gin.Context) {
@@ -138,10 +129,10 @@ func (u *UserHandler) CreateAdmin(c *gin.Context) {
 	var user domain.User
 	c.ShouldBindJSON(&user)
 	user.Role = "admin"
-	err := u.UserUseCase.CreateAdmin(&user)
+	admin, err := u.UserUseCase.CreateAdmin(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": user})
+	c.JSON(http.StatusOK, gin.H{"data": admin})
 }

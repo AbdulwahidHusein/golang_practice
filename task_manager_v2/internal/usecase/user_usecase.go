@@ -15,6 +15,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type UserUseCaseInterface interface {
+	AddUser(user *domain.User) (*domain.User, error)
+	CreateAdmin(admin *domain.User) (*domain.User, error)
+	DeleteUser(deleterID primitive.ObjectID, tobeDeletedID primitive.ObjectID) error
+	UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User
+	GetUser(id primitive.ObjectID) (*domain.User, error)
+	LoginUser(email string, password string) (string, string, error)
+	ActivateUser(id primitive.ObjectID) (*domain.User, error)
+	DeactivateUser(id primitive.ObjectID) (*domain.User, error)
+}
+
 type UserUsecase struct {
 	userRepository repository.UserRepository
 }
@@ -25,19 +36,19 @@ func NEwUserUSecase(userRepository repository.UserRepository) UserUsecase {
 	}
 }
 
-func (u UserUsecase) AddUser(user *domain.User) error {
+func (u UserUsecase) AddUser(user *domain.User) (*domain.User, error) {
 	if !validation.IsValidEmail(user.Email) {
-		return errors.New("invalid email format")
+		return nil, errors.New("invalid email format")
 	}
 	if !validation.IsValidPassword(user.Password) {
-		return errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
+		return nil, errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
 	}
 	usr, err := u.userRepository.GetUserByEmail(user.Email)
 	if usr != nil {
-		return errors.New("user with this email already exists")
+		return nil, errors.New("user with this email already exists")
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	hashedPassword, _ := security.EncryptPassword(user.Password)
@@ -51,7 +62,15 @@ func (u UserUsecase) AddUser(user *domain.User) error {
 	}
 	user.CreatedAt = time.Now()
 
-	return u.userRepository.AddUser(user)
+	createdUser, err := u.userRepository.AddUser(user)
+	if err != nil {
+		return nil, err
+	}
+	if createdUser == nil {
+		return nil, errors.New("user not created")
+	}
+	return createdUser, nil
+
 }
 
 // func (u UserUsecase) AddAdmin(ctx context.Context) (bool, error) {
@@ -131,19 +150,19 @@ func (u UserUsecase) ActivateUser(id primitive.ObjectID) (*domain.User, error) {
 	return usr, nil
 }
 
-func (u UserUsecase) CreateAdmin(user *domain.User) error {
+func (u UserUsecase) CreateAdmin(user *domain.User) (*domain.User, error) {
 	if !validation.IsValidEmail(user.Email) {
-		return errors.New("invalid email format")
+		return nil, errors.New("invalid email format")
 	}
 	if !validation.IsValidPassword(user.Password) {
-		return errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
+		return nil, errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
 	}
 	usr, err := u.userRepository.GetUserByEmail(user.Email)
 	if usr != nil {
-		return errors.New("user with this email already exists")
+		return nil, errors.New("user with this email already exists")
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	hashedPassword, _ := security.EncryptPassword(user.Password)

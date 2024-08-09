@@ -58,8 +58,9 @@ func (suite *MongoUserRepositoryTestSuite) TestAddUser() {
 		Email:    "test_user@gmail.com",
 		Password: "test_password",
 	}
-	err := suite.repo.AddUser(user)
+	usr, err := suite.repo.AddUser(user)
 	require.NoError(suite.T(), err, "Failed to add user")
+	require.Equal(suite.T(), user.Email, usr.Email, "user email does not match")
 
 	var result domain.User
 	err = suite.userCollection.FindOne(context.TODO(), bson.M{"email": "test_user@gmail.com"}).Decode(&result)
@@ -75,7 +76,7 @@ func (suite *MongoUserRepositoryTestSuite) TestGetUserByEmail() {
 		Email:    "test_user@gmail.com",
 		Password: "test_password",
 	}
-	err := suite.repo.AddUser(user)
+	_, err := suite.repo.AddUser(user)
 	require.NoError(suite.T(), err, "Failed to add user")
 
 	dbUser, err := suite.repo.GetUserByEmail("noemail@email.com")
@@ -95,7 +96,7 @@ func (suite *MongoUserRepositoryTestSuite) TestGetUserById() {
 		Email:    "test_user@gmail.com",
 		Password: "test_password",
 	}
-	err := suite.repo.AddUser(user)
+	_, err := suite.repo.AddUser(user)
 	require.NoError(suite.T(), err, "Failed to add user")
 
 	dbUser, err := suite.repo.GetUSerById(user.ID)
@@ -111,7 +112,7 @@ func (suite *MongoUserRepositoryTestSuite) TestUpdateUser() {
 		Email:    "test_user@gmail.com",
 		Password: "test_password",
 	}
-	err := suite.repo.AddUser(user)
+	_, err := suite.repo.AddUser(user)
 	require.NoError(suite.T(), err, "Failed to add user")
 
 	tobeUpdated := &domain.User{
@@ -131,7 +132,7 @@ func (suite *MongoUserRepositoryTestSuite) TestDeleteUser() {
 		Email:    "test_user@gmail.com",
 		Password: "test_password",
 	}
-	err := suite.repo.AddUser(user)
+	_, err := suite.repo.AddUser(user)
 	require.NoError(suite.T(), err, "Failed to add user")
 
 	err = suite.repo.DeleteUser(user.ID)
