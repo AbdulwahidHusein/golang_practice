@@ -1,4 +1,4 @@
-package mongo
+package repository
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 	"task_managemet_api/cmd/task_manager/config"
 	"task_managemet_api/cmd/task_manager/internal/domain"
-	"task_managemet_api/cmd/task_manager/internal/repository"
+	LocalMongo "task_managemet_api/cmd/task_manager/internal/repository/mongo"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -20,7 +20,7 @@ import (
 type MongoTaskRepositoryTestSuite struct {
 	suite.Suite
 	client         *mongo.Client
-	repo           repository.TaskRepository // Use the interface type here
+	repo           TaskRepository // Use the interface type here
 	taskCollection *mongo.Collection
 }
 
@@ -35,7 +35,7 @@ func (suite *MongoTaskRepositoryTestSuite) SetupSuite() {
 
 	suite.client = client
 	suite.taskCollection = client.Database("task_manager_db_test").Collection("tasks")
-	suite.repo = NewMongoTaskRepository(suite.client, "task_manager_db_test", "tasks") // Instantiate correctly
+	suite.repo = LocalMongo.NewMongoTaskRepository(suite.client, "task_manager_db_test", "tasks") // Instantiate correctly
 }
 
 // TearDownSuite runs once after all tests
