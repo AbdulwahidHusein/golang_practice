@@ -19,7 +19,7 @@ type UserUseCaseInterface interface {
 	AddUser(user *domain.User) (*domain.User, error)
 	CreateAdmin(admin *domain.User) (*domain.User, error)
 	DeleteUser(deleterID primitive.ObjectID, tobeDeletedID primitive.ObjectID) error
-	UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User
+	UpdateUser(id primitive.ObjectID, user *domain.User) (*domain.User, error)
 	GetUser(id primitive.ObjectID) (*domain.User, error)
 	LoginUser(email string, password string) (string, string, error)
 	ActivateUser(id primitive.ObjectID) (*domain.User, error)
@@ -84,10 +84,10 @@ func (u UserUsecase) DeleteUser(deleterID primitive.ObjectID, tobeDeletedID prim
 	return u.userRepository.DeleteUser(deleterID)
 }
 
-func (u UserUsecase) UpdateUser(id primitive.ObjectID, user *domain.User) *domain.User {
+func (u UserUsecase) UpdateUser(id primitive.ObjectID, user *domain.User) (*domain.User, error) {
 	DbUser, err := u.userRepository.GetUSerById(id)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	user.ID = id
 	user.Role = DbUser.Role
@@ -97,9 +97,9 @@ func (u UserUsecase) UpdateUser(id primitive.ObjectID, user *domain.User) *domai
 	user.Password = DbUser.Password
 	user, err1 := u.userRepository.UpdateUser(id, user)
 	if err1 != nil {
-		return nil
+		return nil, err
 	}
-	return user
+	return user, nil
 }
 
 func (u UserUsecase) GetUser(id primitive.ObjectID) (*domain.User, error) {

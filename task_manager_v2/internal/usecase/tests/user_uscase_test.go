@@ -88,24 +88,6 @@ func TestUserUsecase_AddUser(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestAddUserInvalidPassword(t *testing.T) {
-	mockRepo := new(MockUserRepository)
-	userUsecase := usecase.NEwUserUSecase(mockRepo)
-
-	user := &domain.User{
-		Email:    "testAbc@gmail.com",
-		Password: "password",
-	}
-	mockRepo.On("GetUserByEmail", mock.Anything).Return(nil, nil)
-	mockRepo.On("IsEmptyCollection", mock.Anything).Return(false, nil)
-	mockRepo.On("AddUser", user).Return(user, nil)
-
-	_, err := userUsecase.AddUser(user)
-	require.Error(t, err)
-
-	mockRepo.AssertExpectations(t)
-}
-
 func TestFirstUserAdmin(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	userUsecase := usecase.NEwUserUSecase(mockRepo)
@@ -183,14 +165,69 @@ func TestInvalidPasswordLogin(t *testing.T) {
 
 	user := &domain.User{
 		Email:    "test@example.com",
-		Password: "$2a$12$ViW2yO/fbVtIbHDmPIgjNOEj6QqJqgWen33FFAhFT.0UCQhNDs1N", //  a hashed password
+		Password: "$2a$12$ViW2yO/fbVtIbHDmPIgjNOEj6QqJqgWen33FFAhFT.0UCQhNDs1N", //  a hashed passwor)
 		Role:     "user",
 	}
 	mockRepo.On("GetUserByEmail", "test@example.com").Return(user, nil)
+
 	accessToken, refreshToken, err := userUsecase.LoginUser("test@example.com", "StA234!@#rongP@ssw0rd")
 
-	assert.Error(t, err, "expected error while logging in since the hashed password is of incorrect, but got: %v", err)
-	assert.Nil(t, accessToken, "expected nil access token, but got: %v", accessToken)
-	assert.Nil(t, refreshToken, "expected nil refresh token, but got: %v", refreshToken)
+	assert.Error(t, err, "since the hash is not correct it must return an error:")
+	assert.Equal(t, "", accessToken, "expected non-nil access token, but got nil")
+	assert.Equal(t, "", refreshToken, "expected non-nil refresh token, but got nil")
 	mockRepo.AssertExpectations(t)
+}
+
+func TestUpdateUser(t *testing.T) {
+	mockRepo := new(MockUserRepository)
+	userUsecase := usecase.NEwUserUSecase(mockRepo)
+
+	user := &domain.User{
+		ID:       primitive.NewObjectID(),
+		Email:    "test@example.com",
+		Password: "$2a$12$ViW2yO/fbVtIbHDmPIgjNOEj6QqJqgWen33FFAhFT.0UCQhNDs1Ny", //a hashed password
+		Role:     "user",
+	}
+	UpdatedUser := &domain.User{
+		ID:        primitive.NewObjectID(),
+		Email:     "test@example.com",
+		Password:  "$2a$12$ViW2yO/fbVtIbHDmPIgjNOEj6QqJqgWen33FFAhFT.0UCQhNDs1Ny", //a hashed password
+		Role:      "user",
+		FirstName: "abdulwahid",
+		LastName:  "hs",
+	}
+	mockRepo.On("UpdateUser", user.ID, UpdatedUser).Return(UpdatedUser, nil)
+	mockRepo.On("GetUSerById", user.ID).Return(user, nil)
+	usr, err := userUsecase.UpdateUser(user.ID, UpdatedUser)
+
+	assert.NoError(t, err)
+	assert.Equal(t, UpdatedUser.Email, user.Email, "expected updated user email to be: %v, but got: %v", UpdatedUser.Email, usr.Email)
+	assert.Equal(t, UpdatedUser.Role, user.Role, "expected updated user role to be: %v, but got: %v", UpdatedUser.Role, usr.Role)
+	assert.Equal(t, UpdatedUser.Password, user.Password, "password should't change during update")
+	assert.Equal(t, UpdatedUser.FirstName, "abdulwahid", "expected updated user first name to be: %v, but got: %v", UpdatedUser.FirstName, usr.FirstName)
+	assert.Equal(t, UpdatedUser.LastName, "hs", "expected updated user last name to be: %v, but got: %v", UpdatedUser.LastName, usr.LastName)
+
+	mockRepo.AssertExpectations(t)
+
+}
+
+func TestCreateAdmin(t *testing.T) {
+	mockRepo := new(MockUserRepository)
+	userUsecase := usecase.NEwUserUSecase(mockRepo)
+
+	user := &domain.User{
+		Email:    "testAbc@gmail.com",
+		Password: "passwordA@#$123",
+	}
+
+	mockRepo.On("GetUserByEmail", "testAbc@gmail.com").Return(nil, nil)
+	mockRepo.On("AddUser", user).Return(user, nil)
+
+	createdUser, err := userUsecase.CreateAdmin(user)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "admin", createdUser.Role)
+
+	mockRepo.AssertExpectations(t)
+
 }

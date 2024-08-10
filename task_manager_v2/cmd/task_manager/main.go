@@ -20,8 +20,10 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
-	taskRepo := mongo.NewMongoTaskRepository(client, "task_manager_db", "tasks")
-	userRepo := mongo.NewMongoUserRepository(client, "task_manager_db", "users")
+	taskCollection := client.Database("task_manager_db").Collection("tasks")
+	taskRepo := mongo.NewMongoTaskRepository(taskCollection)
+	userCollection := client.Database("task_manager_db").Collection("users")
+	userRepo := mongo.NewMongoUserRepository(userCollection)
 
 	router := bootstrap.GetRouter(taskRepo, userRepo)
 

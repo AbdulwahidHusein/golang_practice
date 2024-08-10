@@ -27,9 +27,13 @@ func (u *UserHandler) AddUser(c *gin.Context) {
 
 	usr, err := u.UserUseCase.AddUser(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occurred", "error": "a user with that email already exists"})
 		return
 	}
+	// if user != (domain.User{}) {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "an error occurred", "error": "failed to create user"})
+	// 	return
+	// }
 	c.JSON(http.StatusOK, gin.H{"message": "user created successfully", "data": usr})
 }
 
@@ -38,10 +42,10 @@ func (u *UserHandler) LoginUser(c *gin.Context) {
 	c.ShouldBindJSON(&guest)
 	accessTokenString, refreshTokenString, err := u.UserUseCase.LoginUser(guest.Email, guest.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occurred", "error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "logged in successfully", "data": []map[string]string{{"access": accessTokenString, "refresh": refreshTokenString}}})
+	c.JSON(http.StatusOK, gin.H{"message": "logged in successfully", "data": gin.H{"access_token": accessTokenString, "refresh_token": refreshTokenString}})
 }
 
 func (u *UserHandler) UpdateUser(c *gin.Context) {
@@ -53,9 +57,13 @@ func (u *UserHandler) UpdateUser(c *gin.Context) {
 	}
 	c.ShouldBindJSON(&user)
 
-	updated := u.UserUseCase.UpdateUser(userId, &user)
+	updated, err := u.UserUseCase.UpdateUser(userId, &user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occured", "error": err.Error()})
+		return
+	}
 	if updated == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": "Failed to update user"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occured", "error": "Failed to update user"})
 		return
 	}
 	c.JSON(http.StatusOK, user)

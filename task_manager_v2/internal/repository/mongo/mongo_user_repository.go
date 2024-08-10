@@ -13,8 +13,8 @@ type MongoUserRepository struct {
 	userCollection *mongo.Collection
 }
 
-func NewMongoUserRepository(client *mongo.Client, database string, collection string) *MongoUserRepository {
-	userCollection := client.Database(database).Collection(collection)
+func NewMongoUserRepository(userCollection *mongo.Collection) *MongoUserRepository {
+	// userCollection := client.Database(database).Collection(collection)
 	return &MongoUserRepository{userCollection}
 }
 

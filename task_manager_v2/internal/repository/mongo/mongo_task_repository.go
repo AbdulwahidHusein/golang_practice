@@ -13,9 +13,9 @@ type MongoTaskRepository struct {
 	taskCollection *mongo.Collection
 }
 
-func NewMongoTaskRepository(client *mongo.Client, database string, collection string) *MongoTaskRepository {
-	taskCollection := client.Database(database).Collection(collection)
-	return &MongoTaskRepository{taskCollection}
+func NewMongoTaskRepository(collection *mongo.Collection) *MongoTaskRepository {
+	// taskCollection := client.Database(database).Collection(collection)
+	return &MongoTaskRepository{collection}
 }
 
 func (r *MongoTaskRepository) AddTask(task *domain.Task) error {
