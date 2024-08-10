@@ -53,11 +53,37 @@ func (m *MockUserRepository) GetUserByEmail(email string) (*domain.User, error) 
 	return args.Get(0).(*domain.User), args.Error(1)
 }
 
+type MockPasswordHasher struct {
+	mock.Mock
+}
+
+func (m *MockPasswordHasher) ComparePassword(hashedPassword, password string) error {
+	args := m.Called(hashedPassword, password)
+	return args.Error(0)
+}
+
+func (m *MockPasswordHasher) EncryptPassword(password string) (string, error) {
+	args := m.Called(password)
+	return args.String(0), args.Error(1)
+}
+
+type MockTokenGenerator struct {
+	mock.Mock
+}
+
+func (m *MockTokenGenerator) CreateToken(userID, role, email string) (string, string, error) {
+	args := m.Called(userID, role, email)
+	return args.String(0), args.String(1), args.Error(2)
+}
+
 // Test for AddUser method
 // Test for AddUser method
 func TestUserUsecase_AddUser(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	userUsecase := usecase.NEwUserUSecase(mockRepo)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
 
 	user := &domain.User{
 		Email:    "testAbc@gmail.com",
@@ -70,6 +96,7 @@ func TestUserUsecase_AddUser(t *testing.T) {
 	// Mock the IsEmptyCollection to return false
 	mockRepo.On("IsEmptyCollection", mock.Anything).Return(false, nil)
 
+	mockHasher.On("EncryptPassword", mock.Anything).Return("Stron@#$adgP@ssw0rd123", nil)
 	// Mock the AddUser to return the user
 	mockRepo.On("AddUser", user).Return(user, nil)
 
@@ -90,7 +117,10 @@ func TestUserUsecase_AddUser(t *testing.T) {
 
 func TestFirstUserAdmin(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	userUsecase := usecase.NEwUserUSecase(mockRepo)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
 
 	user := &domain.User{
 		Email:    "testAbc@gmail.com",
@@ -112,9 +142,13 @@ func TestFirstUserAdmin(t *testing.T) {
 // Test for DeleteUser method
 func TestUserUsecase_DeleteUser(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	userUsecase := usecase.NEwUserUSecase(mockRepo)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
 
 	userID := primitive.NewObjectID()
+	mockHasher.On("ComparePassword", mock.Anything, mock.Anything).Return(nil)
 
 	// Test unauthorized deletion
 	err := userUsecase.DeleteUser(userID, primitive.NewObjectID())
@@ -130,7 +164,10 @@ func TestUserUsecase_DeleteUser(t *testing.T) {
 // Test for LoginUser method
 func TestUserUsecase_LoginUser(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	userUsecase := usecase.NEwUserUSecase(mockRepo)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
 
 	user := &domain.User{
 		Email:    "test@example.com",
@@ -140,16 +177,6 @@ func TestUserUsecase_LoginUser(t *testing.T) {
 
 	// Mock the GetUserByEmail to return the user
 	mockRepo.On("GetUserByEmail", "test@example.com").Return(user, nil)
-
-	// Mock the password comparison
-	// security.ComparePassword = func(hashedPassword, password string) error {
-	// 	return nil
-	// }
-
-	// // Mock the token creation
-	// security.CreateToken = func(userID, role, email string) (string, string, error) {
-	// 	return "access-token", "refresh-token", nil
-	// }
 
 	accessToken, refreshToken, err := userUsecase.LoginUser("test@example.com", "StA234!@#rongP@ssw0rd")
 
@@ -161,7 +188,10 @@ func TestUserUsecase_LoginUser(t *testing.T) {
 
 func TestInvalidPasswordLogin(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	userUsecase := usecase.NEwUserUSecase(mockRepo)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
 
 	user := &domain.User{
 		Email:    "test@example.com",
@@ -180,7 +210,10 @@ func TestInvalidPasswordLogin(t *testing.T) {
 
 func TestUpdateUser(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	userUsecase := usecase.NEwUserUSecase(mockRepo)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
 
 	user := &domain.User{
 		ID:       primitive.NewObjectID(),
@@ -213,7 +246,10 @@ func TestUpdateUser(t *testing.T) {
 
 func TestCreateAdmin(t *testing.T) {
 	mockRepo := new(MockUserRepository)
-	userUsecase := usecase.NEwUserUSecase(mockRepo)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
 
 	user := &domain.User{
 		Email:    "testAbc@gmail.com",
