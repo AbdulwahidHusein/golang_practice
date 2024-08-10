@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"task_managemet_api/cmd/task_manager/config"
 	"time"
 
@@ -12,11 +13,16 @@ import (
 )
 
 func CreateToken(userId, role, email string) (string, string, error) {
-	secretKey := config.GetSecretKey()
+	secretKey := config.GetEnvs()["SECRET_KEY"]
 	if len(secretKey) == 0 {
 		log.Fatal("SECRET_KEY not set in .env file")
 	}
-	accessExpiry, RefreshExpiry := config.GetTokenExpiry()
+	accessExpiry, err1 := strconv.Atoi(config.GetEnvs()["ACCESSES_TOKEN_EXPIRY"])
+	RefreshExpiry, err2 := strconv.Atoi(config.GetEnvs()["REFRESH_TOKEN_EXPIRY"])
+	if err1 != nil || err2 != nil {
+		log.Fatal("TOKEN_EXPIRY not set in .env file")
+	}
+
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": userId,
 		"role":   role,
@@ -44,7 +50,7 @@ func CreateToken(userId, role, email string) (string, string, error) {
 }
 
 func VerifyToken(tokenString string) (jwt.MapClaims, error) {
-	secretKey := config.GetSecretKey()
+	secretKey := config.GetEnvs()["SECRET_KEY"]
 	if len(secretKey) == 0 {
 		return nil, fmt.Errorf("SECRET_KEY not set in .env file")
 	}

@@ -26,7 +26,7 @@ type MongoUserRepositoryTestSuite struct {
 
 // SetupSuite runs once before all tests
 func (suite *MongoUserRepositoryTestSuite) SetupSuite() {
-	clientOptions := options.Client().ApplyURI(config.GetMongoURI())
+	clientOptions := options.Client().ApplyURI(config.GetEnvs()["MONGO_URI"])
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	require.NoError(suite.T(), err, "Failed to connect to MongoDB")
 
