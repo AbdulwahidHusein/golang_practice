@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"task_managemet_api/cmd/task_manager/internal/domain"
@@ -129,6 +130,7 @@ func TestFirstUserAdmin(t *testing.T) {
 	mockRepo.On("GetUserByEmail", mock.Anything).Return(nil, nil)
 	mockRepo.On("IsEmptyCollection", mock.Anything).Return(true, nil)
 	mockRepo.On("AddUser", user).Return(user, nil)
+	mockHasher.On("EncryptPassword", mock.Anything).Return("passwordA@#$123", nil)
 	createdUser, err := userUsecase.AddUser(user)
 
 	if err != nil {
@@ -176,8 +178,9 @@ func TestUserUsecase_LoginUser(t *testing.T) {
 	}
 
 	// Mock the GetUserByEmail to return the user
+	mockTokenGen.On("CreateToken", mock.Anything, mock.Anything, mock.Anything).Return("access_token", "refresh_token", nil)
+	mockHasher.On("ComparePassword", mock.Anything, mock.Anything).Return(nil)
 	mockRepo.On("GetUserByEmail", "test@example.com").Return(user, nil)
-
 	accessToken, refreshToken, err := userUsecase.LoginUser("test@example.com", "StA234!@#rongP@ssw0rd")
 
 	assert.NoError(t, err, "expected no error while logging in, but got: %v", err)
@@ -198,6 +201,8 @@ func TestInvalidPasswordLogin(t *testing.T) {
 		Password: "$2a$12$ViW2yO/fbVtIbHDmPIgjNOEj6QqJqgWen33FFAhFT.0UCQhNDs1N", //  a hashed passwor)
 		Role:     "user",
 	}
+
+	mockHasher.On("ComparePassword", mock.Anything, mock.Anything).Return(errors.New("invalid password"))
 	mockRepo.On("GetUserByEmail", "test@example.com").Return(user, nil)
 
 	accessToken, refreshToken, err := userUsecase.LoginUser("test@example.com", "StA234!@#rongP@ssw0rd")
@@ -256,6 +261,7 @@ func TestCreateAdmin(t *testing.T) {
 		Password: "passwordA@#$123",
 	}
 
+	mockHasher.On("EncryptPassword", mock.Anything).Return("passwordA@#$123", nil)
 	mockRepo.On("GetUserByEmail", "testAbc@gmail.com").Return(nil, nil)
 	mockRepo.On("AddUser", user).Return(user, nil)
 

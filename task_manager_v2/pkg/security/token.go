@@ -12,7 +12,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func CreateToken(userId, role, email string) (string, string, error) {
+type TokenUtil struct {
+}
+
+func (u TokenUtil) CreateToken(userId, role, email string) (string, string, error) {
 	secretKey := config.GetEnvs()["SECRET_KEY"]
 	if len(secretKey) == 0 {
 		log.Fatal("SECRET_KEY not set in .env file")
@@ -49,7 +52,7 @@ func CreateToken(userId, role, email string) (string, string, error) {
 	return accessTokenString, refreshTokenString, nil
 }
 
-func VerifyToken(tokenString string) (jwt.MapClaims, error) {
+func (u TokenUtil) VerifyToken(tokenString string) (jwt.MapClaims, error) {
 	secretKey := config.GetEnvs()["SECRET_KEY"]
 	if len(secretKey) == 0 {
 		return nil, fmt.Errorf("SECRET_KEY not set in .env file")
@@ -80,14 +83,14 @@ func VerifyToken(tokenString string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func RefreshToken(refreshToken string) (string, string, error) {
+func (u TokenUtil) RefreshToken(refreshToken string) (string, string, error) {
 
-	claims, err := VerifyToken(refreshToken)
+	claims, err := u.VerifyToken(refreshToken)
 	if err != nil {
 		return "", "", err
 	}
 	userId, role, email := claims["userId"].(string), claims["role"].(string), claims["email"].(string)
-	newAccess, newRefresh, err := CreateToken(userId, role, email)
+	newAccess, newRefresh, err := u.CreateToken(userId, role, email)
 
 	if err != nil {
 		return "", "", err
@@ -95,9 +98,9 @@ func RefreshToken(refreshToken string) (string, string, error) {
 	return newAccess, newRefresh, nil
 }
 
-func RefreshTokenHandler(c *gin.Context) {
+func (u TokenUtil) RefreshTokenHandler(c *gin.Context) {
 	refreshToken := c.PostForm("refresh_token")
-	access, refresh, err := RefreshToken(refreshToken)
+	access, refresh, err := u.RefreshToken(refreshToken)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

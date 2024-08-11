@@ -1,16 +1,13 @@
+// user_usecase.go
 package usecase
 
 import (
 	"context"
-	"task_managemet_api/cmd/task_manager/internal/domain"
-	"task_managemet_api/cmd/task_manager/pkg/security"
-	"time"
-
-	"task_managemet_api/cmd/task_manager/internal/repository"
-
-	"task_managemet_api/cmd/task_manager/pkg/validation"
-
 	"errors"
+	"task_managemet_api/cmd/task_manager/internal/domain"
+	"task_managemet_api/cmd/task_manager/internal/repository"
+	"task_managemet_api/cmd/task_manager/pkg/validation"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -28,11 +25,15 @@ type UserUseCaseInterface interface {
 
 type UserUsecase struct {
 	userRepository repository.UserRepository
+	hasher         PasswordHasher
+	tokenGen       TokenGenerator
 }
 
-func NEwUserUSecase(userRepository repository.UserRepository) UserUsecase {
+func NewUserUsecase(userRepository repository.UserRepository, hasher PasswordHasher, tokenGen TokenGenerator) UserUsecase {
 	return UserUsecase{
 		userRepository: userRepository,
+		hasher:         hasher,
+		tokenGen:       tokenGen,
 	}
 }
 
@@ -51,7 +52,7 @@ func (u UserUsecase) AddUser(user *domain.User) (*domain.User, error) {
 		return nil, err
 	}
 
-	hashedPassword, _ := security.EncryptPassword(user.Password)
+	hashedPassword, _ := u.hasher.EncryptPassword(user.Password)
 	user.Password = hashedPassword
 	user.Isactivated = false
 
@@ -70,12 +71,7 @@ func (u UserUsecase) AddUser(user *domain.User) (*domain.User, error) {
 		return nil, errors.New("user not created")
 	}
 	return createdUser, nil
-
 }
-
-// func (u UserUsecase) AddAdmin(ctx context.Context) (bool, error) {
-
-// }
 
 func (u UserUsecase) DeleteUser(deleterID primitive.ObjectID, tobeDeletedID primitive.ObjectID) error {
 	if deleterID != tobeDeletedID {
@@ -112,15 +108,14 @@ func (u UserUsecase) LoginUser(email string, password string) (string, string, e
 		return "", "", err
 	}
 	hashedPassword := realUser.Password
-	if err := security.ComparePassword(hashedPassword, password); err != nil {
+	if err := u.hasher.ComparePassword(hashedPassword, password); err != nil {
 		return "", "", err
 	}
-	accessTokenString, refreshTokenString, err := security.CreateToken(realUser.ID.Hex(), realUser.Role, realUser.Email)
+	accessTokenString, refreshTokenString, err := u.tokenGen.CreateToken(realUser.ID.Hex(), realUser.Role, realUser.Email)
 	if err != nil {
 		return "", "", err
 	}
 	return accessTokenString, refreshTokenString, nil
-
 }
 
 func (u UserUsecase) DeactivateUser(userID primitive.ObjectID) (*domain.User, error) {
@@ -165,7 +160,7 @@ func (u UserUsecase) CreateAdmin(user *domain.User) (*domain.User, error) {
 		return nil, err
 	}
 
-	hashedPassword, _ := security.EncryptPassword(user.Password)
+	hashedPassword, _ := u.hasher.EncryptPassword(user.Password)
 	user.Password = hashedPassword
 	user.Isactivated = true
 	user.Role = "admin"

@@ -4,7 +4,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func EncryptPassword(password string) (string, error) {
+type PasswordUtil struct {
+}
+
+func (u PasswordUtil) EncryptPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
@@ -12,6 +15,6 @@ func EncryptPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func ComparePassword(hashedPassword, password string) error {
+func (u PasswordUtil) ComparePassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

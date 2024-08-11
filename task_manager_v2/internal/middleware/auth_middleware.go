@@ -26,7 +26,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		claims, err := security.VerifyToken(authParts[1])
+		tu := security.TokenUtil{}
+		claims, err := tu.VerifyToken(authParts[1])
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			c.Abort()

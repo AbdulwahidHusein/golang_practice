@@ -12,12 +12,13 @@ import (
 
 func RegisterUserRoutes(router *gin.Engine, userController *http.UserHandler) {
 	r := router.Group("/auth")
+	tu := security.TokenUtil{}
 	r.POST("/register", userController.AddUser)
 	r.POST("/login", userController.LoginUser)
 	r.PUT("/user", middleware.AuthMiddleware(), userController.UpdateUser)
 	r.DELETE("/user", middleware.AuthMiddleware(), userController.DeleteUser)
 	r.GET("/user", middleware.AuthMiddleware(), userController.GetUser)
-	r.POST("/refresh", middleware.AuthMiddleware(), security.RefreshTokenHandler)
+	r.POST("/refresh", middleware.AuthMiddleware(), tu.RefreshTokenHandler)
 
 	admin := router.Group("/admin", middleware.AuthMiddleware(), middleware.ISAdminMiddleWare())
 	admin.PUT("/approve/:id", userController.ApproveUser)
