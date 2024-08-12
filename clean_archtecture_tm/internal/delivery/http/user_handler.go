@@ -26,6 +26,10 @@ func (u *UserHandler) AddUser(c *gin.Context) {
 	var user domain.User
 	c.ShouldBindJSON(&user)
 
+	if user.Email == "" || user.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occurred", "error": "email is required"})
+		return
+	}
 	usr, err := u.UserUseCase.AddUser(&user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occurred", "error": "a user with that email already exists"})

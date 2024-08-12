@@ -34,6 +34,10 @@ func (c *TaskHandler) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if task.Title == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "title is required"})
+		return
+	}
 	err := c.TaskUsecase.AddTask(&task)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -57,7 +61,7 @@ func (c *TaskHandler) GetTask(ctx *gin.Context) {
 	task, err := c.TaskUsecase.GetTask(taskId)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, task)

@@ -147,6 +147,23 @@ func (s *UserHandlerSuit) TestAddUser_positive() {
 
 }
 
+func (s *UserHandlerSuit) TestAddUser_NoEmail() {
+	user := &domain.User{
+		Email:    "",
+		Password: "test_passwordAbcd123@#$",
+	}
+	requestBody, err := json.Marshal(&user)
+	s.NoError(err, "can not marshal struct to json")
+
+	// calling the testing server given the provided request body
+	response, err := http.Post(fmt.Sprintf("%s/auth/register", s.testingServer.URL), "application/json", bytes.NewBuffer(requestBody))
+	s.NoError(err, "no error when calling the endpoint")
+	defer response.Body.Close()
+
+	s.Equal(http.StatusBadRequest, response.StatusCode, "expected status code %d got %d", http.StatusBadRequest, response.StatusCode)
+	s.userUsecase.AssertExpectations(s.T())
+}
+
 func (s *UserHandlerSuit) TestAddUser_UseCaseReturnError() {
 
 	user := &domain.User{
@@ -199,6 +216,24 @@ func (s *UserHandlerSuit) TestLoginUser_positive() {
 	s.Equal("access_token", ResponseBody.Data.AccessToken, "expected access_token 'access_token', got '%s'", ResponseBody.Data.AccessToken)
 	s.Equal("refresh_token", ResponseBody.Data.RefreshToken, "expected refresh_token 'refresh_token', got '%s'", ResponseBody.Data.RefreshToken)
 
+	s.userUsecase.AssertExpectations(s.T())
+}
+
+func (s *UserHandlerSuit) TestLoginUser_CredentialAsParam() {
+
+	user := &domain.User{
+		Email:    "test_user@gmail.com",
+		Password: "test_passwordAbcd123@#$",
+	}
+	// s.userUsecase.On("LoginUser", mock.Anything, mock.Anything).Return("access_token", "refresh_token", nil)
+
+	// // Marshalling
+
+	response, err := http.Post(fmt.Sprintf("%s/auth/login?email=%s&password=%s", s.testingServer.URL, user.Email, user.Password), "application/json", bytes.NewBuffer([]byte{}))
+	s.NoError(err, "no error when calling the endpoint")
+	defer response.Body.Close()
+
+	s.Equal(http.StatusInternalServerError, response.StatusCode, "expected status code %d got %d", http.StatusBadRequest, response.StatusCode)
 	s.userUsecase.AssertExpectations(s.T())
 }
 
