@@ -39,4 +39,5 @@ go run main.go
 
 
 ### API DOCUMENTATION: Visit 
-<a href="https://documenter.getpostman.com/view/28093624/2sA3rzLYy5"> Documentation Link</a>
+<a  href="https://documenter.getpostman.com/view/28093624/2sA3rzLYy5" target="_blank">Postman Documentation Link</a>  OR
+<a href="https://github.com/AbdulwahidHusein/golang_practice/blob/main/clean_archtecture_tm/doc.md">Documentation.md</a>
