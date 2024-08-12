@@ -230,9 +230,7 @@ These routes are accessible only to authenticated users with admin privileges. T
 - **Sample Response**:
   ```json
   {
-    "message": "Task deleted successfully
-
-"
+    "message": "Task deleted successfully"
   }
   ```
 
