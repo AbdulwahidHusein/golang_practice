@@ -19,7 +19,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: '1.22.5'  # Use the Go version you need
+        go-version: '1.22.5'
 
     - name: Cache Go modules
       uses: actions/cache@v3
@@ -36,7 +36,20 @@ jobs:
         cd clean_archtecture_tm
         go mod download
 
+
+    - name: Print environment variables
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      run: |
+        echo "MONGODB_URI: $MONGODB_URI"
+
+
+        
     - name: Run tests
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+
+        
       run: |
         cd clean_archtecture_tm
         go test -v ./...
