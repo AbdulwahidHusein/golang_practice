@@ -44,6 +44,8 @@ jobs:
         go mod download
 
     - name: Run tests
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
       run: |
         cd clean_archtecture_tm
         go test -v ./...
