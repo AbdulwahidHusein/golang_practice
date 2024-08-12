@@ -11,7 +11,7 @@ import (
 var Envs map[string]string
 
 func GetEnvs() map[string]string {
-	if err := godotenv.Load("C:\\Users\\Abdi\\Downloads\\golang_practice\\task_manager_v2\\cmd\\task_manager/.env"); err != nil {
+	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}
 
