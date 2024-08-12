@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"task_managemet_api/cmd/task_manager/internal/domain"
+	"task_managemet_api/cmd/task_manager/pkg/security"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -86,7 +87,9 @@ type UserHandlerSuit struct {
 func (suite *UserHandlerSuit) SetupTest() {
 
 	suite.userUsecase = new(MockUserUsecase)
-	suite.handler = myHttp.NewUserHandler(suite.userUsecase)
+	fromTokenGetter := security.GetTokenData{}
+
+	suite.handler = myHttp.NewUserHandler(suite.userUsecase, fromTokenGetter)
 
 	router := gin.Default()
 	r := router.Group("/auth")

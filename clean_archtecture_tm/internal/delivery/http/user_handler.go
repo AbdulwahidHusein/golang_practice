@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 	"task_managemet_api/cmd/task_manager/internal/domain"
-	"task_managemet_api/cmd/task_manager/pkg/security"
 
 	"task_managemet_api/cmd/task_manager/internal/usecase"
 
@@ -12,12 +11,14 @@ import (
 )
 
 type UserHandler struct {
-	UserUseCase usecase.UserUseCaseInterface
+	UserUseCase  usecase.UserUseCaseInterface
+	getFromToken GetFromToken
 }
 
-func NewUserHandler(userUseCase usecase.UserUseCaseInterface) *UserHandler {
+func NewUserHandler(userUseCase usecase.UserUseCaseInterface, getFromToken GetFromToken) *UserHandler {
 	return &UserHandler{
-		UserUseCase: userUseCase,
+		UserUseCase:  userUseCase,
+		getFromToken: getFromToken,
 	}
 }
 
@@ -50,7 +51,7 @@ func (u *UserHandler) LoginUser(c *gin.Context) {
 
 func (u *UserHandler) UpdateUser(c *gin.Context) {
 	var user domain.User
-	userId, err1 := security.GetUSerIdFormToken(c)
+	userId, err1 := u.getFromToken.GetUserIdFormToken(c)
 	if err1 != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occured", "error": err1.Error()})
 		return
@@ -71,7 +72,7 @@ func (u *UserHandler) UpdateUser(c *gin.Context) {
 
 func (u *UserHandler) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
-	deleterID, err := security.GetUSerIdFormToken(c)
+	deleterID, err := u.getFromToken.GetUserIdFormToken(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "an error occured", "error": err.Error()})
 		return
@@ -90,7 +91,7 @@ func (u *UserHandler) DeleteUser(c *gin.Context) {
 }
 
 func (u *UserHandler) GetUser(c *gin.Context) {
-	userId, err := security.GetUSerIdFormToken(c)
+	userId, err := u.getFromToken.GetUserIdFormToken(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "an invalid id", "error": "Invalid user ID"})
 		return

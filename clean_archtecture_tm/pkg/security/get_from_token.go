@@ -8,7 +8,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func GetUSerIdFormToken(c *gin.Context) (primitive.ObjectID, error) {
+type GetFromToken interface {
+	GetUserIdFormToken(c *gin.Context) (primitive.ObjectID, error)
+	GetEmailFromToken(c *gin.Context) (string, error)
+	GetRoleFromToken(c *gin.Context) (string, error)
+}
+
+type GetTokenData struct {
+}
+
+func (GetTokenData) GetUserIdFormToken(c *gin.Context) (primitive.ObjectID, error) {
 	claims, exists := c.Get("claims")
 	if !exists {
 		return (primitive.ObjectID{}), nil
@@ -20,4 +29,22 @@ func GetUSerIdFormToken(c *gin.Context) (primitive.ObjectID, error) {
 		return (primitive.ObjectID{}), errr
 	}
 	return userId, nil
+}
+
+func (GetTokenData) GetEmailFromToken(c *gin.Context) (string, error) {
+	claims, exists := c.Get("claims")
+	if !exists {
+		return "", nil
+	}
+	email := claims.(jwt.MapClaims)["email"].(string)
+	return email, nil
+}
+
+func (GetTokenData) GetRoleFromToken(c *gin.Context) (string, error) {
+	claims, exists := c.Get("claims")
+	if !exists {
+		return "", nil
+	}
+	role := claims.(jwt.MapClaims)["role"].(string)
+	return role, nil
 }

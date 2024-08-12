@@ -19,7 +19,8 @@ func GetRouter(taskRepo repository.TaskRepository, userRepo repository.UserRepos
 
 	userUsecase := usecase.NewUserUsecase(userRepo, security.PasswordUtil{}, &security.TokenUtil{})
 
-	userHandler := http.NewUserHandler(userUsecase)
+	fromTokenGetter := security.GetTokenData{}
+	userHandler := http.NewUserHandler(userUsecase, fromTokenGetter)
 	routes.RegisterUserRoutes(router, userHandler)
 
 	return router
