@@ -33,15 +33,15 @@ jobs:
 
     - name: Install dependencies
       run: |
-        cd task_manager_v2
+        cd clean_archtecture_tm
         go mod download
 
     - name: Run tests
       run: |
-        cd task_manager_v2
+        cd clean_archtecture_tm
         go test -v ./...
 
     - name: Build
       run: |
-        cd task_manager_v2
+        cd clean_archtecture_tm
         go build -v ./...
