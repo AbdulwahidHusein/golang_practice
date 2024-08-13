@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"errors"
 	"task_managemet_api/cmd/task_manager/internal/domain"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,6 +30,9 @@ func NewMongoTaskRepository(collection MongoTaskCollection) *MongoTaskRepository
 
 func (r *MongoTaskRepository) AddTask(task *domain.Task) error {
 	task.ID = primitive.NewObjectID()
+	if len(task.Description) > 1000 || len(task.Title) > 1000 {
+		return errors.New("task title and description must be less than 1000 characters")
+	}
 	_, err := r.taskCollection.InsertOne(context.TODO(), task)
 	return err
 }
@@ -54,6 +58,10 @@ func (r *MongoTaskRepository) GetTaskById(id string) (*domain.Task, error) {
 	var task domain.Task
 	oid, _ := primitive.ObjectIDFromHex(id)
 	err := r.taskCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&task)
+
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
 	return &task, err
 }
 
@@ -65,16 +73,24 @@ func (r *MongoTaskRepository) UpdateTask(task *domain.Task) error {
 		"due_date":    task.DueDate,
 		"status":      task.Status,
 	}
-
+	originalTask := domain.Task{}
+	err := r.taskCollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&originalTask)
+	if err != nil {
+		return err
+	}
 	update := bson.M{"$set": updateFields}
-	_, err := r.taskCollection.UpdateOne(context.TODO(), bson.M{"_id": id}, update)
-	return err
+	_, err1 := r.taskCollection.UpdateOne(context.TODO(), bson.M{"_id": id}, update)
+	return err1
 }
 
 func (r *MongoTaskRepository) DeleteTask(id string) error {
 	oid, _ := primitive.ObjectIDFromHex(id)
-	_, err := r.taskCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
-	return err
+	err := r.taskCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&domain.Task{})
+	if err == mongo.ErrNoDocuments {
+		return errors.New("task not found")
+	}
+	_, err1 := r.taskCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
+	return err1
 }
 
 func (r *MongoTaskRepository) GetTasksWithCriteria(criteria map[string]interface{}) ([]*domain.Task, error) {
