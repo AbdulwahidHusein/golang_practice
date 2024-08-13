@@ -21,10 +21,10 @@ func RegisterUserRoutes(router *gin.Engine, userController *http.UserHandler) {
 	r.POST("/refresh", middleware.AuthMiddleware(), tu.RefreshTokenHandler)
 
 	admin := router.Group("/admin", middleware.AuthMiddleware(), middleware.ISAdminMiddleWare())
-	admin.PUT("/approve/:id", userController.ApproveUser)
-	admin.PUT("/disapprove/:id", userController.DisApproveUser)
+	admin.PUT("user/approve/:id", userController.ApproveUser)
+	admin.PUT("user/disapprove/:id", userController.DisApproveUser)
 	admin.POST("/create-admin", userController.CreateAdmin)
 
-	admin.PUT("/promote/:id", userController.PromoteUser)
-	admin.PUT("/demote/:id", userController.DemoteUser)
+	admin.PUT("user/promote/:id", userController.PromoteUser)
+	admin.PUT("user/demote/:id", userController.DemoteUser)
 }
