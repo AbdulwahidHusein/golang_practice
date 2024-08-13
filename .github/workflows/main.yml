@@ -45,14 +45,25 @@ jobs:
 
 
         
-    - name: Run tests
+    - name: Run delivery tests
       env:
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
-        
       run: |
-        cd clean_archtecture_tm
+        cd clean_archtecture_tm/internal/delivery
         go test -v ./...
+      
+
+    - name: Run usecase tests
+      run: |
+        cd clean_archtecture_tm/internal/usecase
+        go test -v ./...
+    
+    - name: Run pkg tests
+      run: |
+        cd clean_archtecture_tm/pkg
+        go test -v ./...
+      
 
     - name: Build
       run: |
