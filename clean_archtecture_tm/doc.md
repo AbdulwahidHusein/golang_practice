@@ -238,7 +238,7 @@ These routes are accessible only to authenticated users with admin privileges. T
 
 These routes allow authenticated users to manage their profiles and view task assignments.
 
-#### **`GET /users/me`**
+#### **`GET /users/`**
 
 - **Description**: Retrieves the authenticated user's profile.
 - **Headers**: 
@@ -258,7 +258,7 @@ These routes allow authenticated users to manage their profiles and view task as
   }
   ```
 
-#### **`PUT /users/me`**
+#### **`PUT /users/`**
 
 - **Description**: Updates the authenticated user's profile.
 - **Headers**: 
@@ -283,6 +283,98 @@ These routes allow authenticated users to manage their profiles and view task as
     "email": "newemail@example.com"
   }
   ```
+
+### **Admin only Routes (For user management)**
+
+These routes allow admins to control users
+
+#### **`GET admin/user/approve/:id`**
+
+- **Description**: approves the user changing approved field to True.
+- **Headers**: 
+  - `Authorization: Bearer <token>`
+- **Sample Request**:
+  ```http
+  GET /users/me HTTP/1.1
+  Host: api.example.com
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  ```
+- **Sample Response**:
+  ```json
+  {
+    "id": "60c72b2f9b7d6c001c8e4ae6",
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "approved": true
+  }
+  ```
+
+#### **`GET admin/user/diapprove/:id`**
+
+- **Description**: dis-approves the user changing approved field to True.
+- **Headers**: 
+  - `Authorization: Bearer <token>`
+- **Sample Request**:
+  ```http
+  GET /users/me HTTP/1.1
+  Host: api.example.com
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  ```
+- **Sample Response**:
+  ```json
+  {
+    "id": "60c72b2f9b7d6c001c8e4ae6",
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "approved": false
+  }
+
+### **Promote users to admin**
+
+#### **`GET admin/user/promote/:id`**
+
+- **Description**: promotes a user with the given id to admin.
+- **Headers**: 
+  - `Authorization: Bearer <token>`
+- **Sample Request**:
+  ```http
+  GET /users/me HTTP/1.1
+  Host: api.example.com
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  ```
+- **Sample Response**:
+  ```json
+  {
+    "id": "60c72b2f9b7d6c001c8e4ae6",
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "approved": true,
+    "role" : "admin",
+  }
+  ```
+
+  ### **demote user from being users to admin**
+
+#### **`GET admin/user/demote/:id`**
+
+- **Description**: promotes a user with the given id to admin.
+- **Headers**: 
+  - `Authorization: Bearer <token>`
+- **Sample Request**:
+  ```http
+  GET /users/me HTTP/1.1
+  Host: api.example.com
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  ```
+- **Sample Response**:
+  ```json
+  {
+    "id": "60c72b2f9b7d6c001c8e4ae6",
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "approved": true,
+    "role" : "user",
+  }
 
 ### **Authentication Routes**
 
