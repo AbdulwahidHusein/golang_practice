@@ -24,4 +24,7 @@ func RegisterUserRoutes(router *gin.Engine, userController *http.UserHandler) {
 	admin.PUT("/approve/:id", userController.ApproveUser)
 	admin.PUT("/disapprove/:id", userController.DisApproveUser)
 	admin.POST("/create-admin", userController.CreateAdmin)
+
+	admin.PUT("/promote/:id", userController.PromoteUser)
+	admin.PUT("/demote/:id", userController.DemoteUser)
 }

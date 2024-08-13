@@ -20,4 +20,5 @@ func RegisterTaskRoutes(router *gin.Engine, taskController *http.TaskHandler) {
 	adminOnly.POST("/tasks", taskController.CreateTask)
 	adminOnly.DELETE("/tasks/:id", taskController.DeleteTask)
 	adminOnly.GET("/tasks/status/:status", taskController.GetTaskByStatus) // Changed route
+
 }

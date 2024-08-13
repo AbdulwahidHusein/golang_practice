@@ -20,6 +20,8 @@ type UserUseCaseInterface interface {
 	LoginUser(email string, password string) (string, string, error)
 	ActivateUser(id primitive.ObjectID) (*domain.User, error)
 	DeactivateUser(id primitive.ObjectID) (*domain.User, error)
+	PromoteUser(userId primitive.ObjectID) (*domain.User, error)
+	DemoteUser(userId primitive.ObjectID) (*domain.User, error)
 }
 
 type UserUsecase struct {
@@ -139,6 +141,32 @@ func (u UserUsecase) ActivateUser(id primitive.ObjectID) (*domain.User, error) {
 	}
 	user.Isactivated = true
 
+	usr, err1 := u.userRepository.UpdateUser(user.ID, user)
+	if err1 != nil {
+		return nil, err1
+	}
+	return usr, nil
+}
+
+func (u UserUsecase) PromoteUser(userId primitive.ObjectID) (*domain.User, error) {
+	user, err := u.userRepository.GetUSerById(userId)
+	if err != nil {
+		return nil, err
+	}
+	user.Role = "admin"
+	usr, err1 := u.userRepository.UpdateUser(user.ID, user)
+	if err1 != nil {
+		return nil, err1
+	}
+	return usr, nil
+}
+
+func (u UserUsecase) DemoteUser(userId primitive.ObjectID) (*domain.User, error) {
+	user, err := u.userRepository.GetUSerById(userId)
+	if err != nil {
+		return nil, err
+	}
+	user.Role = "user"
 	usr, err1 := u.userRepository.UpdateUser(user.ID, user)
 	if err1 != nil {
 		return nil, err1

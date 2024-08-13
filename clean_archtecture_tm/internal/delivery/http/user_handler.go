@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"task_managemet_api/cmd/task_manager/internal/domain"
 
@@ -148,4 +149,35 @@ func (u *UserHandler) CreateAdmin(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": admin})
+}
+
+func (u *UserHandler) PromoteUser(c *gin.Context) {
+	id := c.Param("id")
+	userIdObj, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid id", "error": "Invalid user ID"})
+		return
+	}
+	usr, err := u.UserUseCase.PromoteUser(userIdObj)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": errors.New("failed to promote user")})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User promoted successfully", "user": usr})
+}
+
+func (u *UserHandler) DemoteUser(c *gin.Context) {
+	id := c.Param("id")
+	userIdObj, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid id", "error": "Invalid user ID"})
+		return
+	}
+	usr, err := u.UserUseCase.DemoteUser(userIdObj)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occured", "error": errors.New("failed to demote user")})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User demoted successfully", "data": usr})
 }
