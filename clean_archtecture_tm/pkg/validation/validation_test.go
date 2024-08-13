@@ -5,6 +5,8 @@ import (
 )
 
 func TestEmailValidator(t *testing.T) {
+	validator := InputValidationUtil{}
+
 	tests := []struct {
 		email string
 		valid bool
@@ -24,7 +26,7 @@ func TestEmailValidator(t *testing.T) {
 
 	for _, sample := range tests {
 		t.Run(sample.email, func(t *testing.T) {
-			result := IsValidEmail(sample.email)
+			result := validator.IsValidEmail(sample.email)
 			if result != sample.valid {
 				t.Errorf("IsValidEmail(%q) = %v; want %v", sample.email, result, sample.valid)
 			}
@@ -34,6 +36,7 @@ func TestEmailValidator(t *testing.T) {
 }
 
 func TestPasswordValidator(t *testing.T) {
+	validator := InputValidationUtil{}
 	tests := []struct {
 		password string
 		valid    bool
@@ -53,7 +56,7 @@ func TestPasswordValidator(t *testing.T) {
 
 	for _, sample := range tests {
 		t.Run(sample.password, func(t *testing.T) {
-			result := IsValidPassword(sample.password)
+			result := validator.IsValidPassword(sample.password)
 			if result != sample.valid {
 				t.Errorf("IsValidPassword(%q) = %v; want %v", sample.password, result, sample.valid)
 			}

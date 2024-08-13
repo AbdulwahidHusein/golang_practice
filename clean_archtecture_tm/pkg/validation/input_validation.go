@@ -5,13 +5,16 @@ import (
 	"unicode"
 )
 
-func IsValidEmail(email string) bool {
+type InputValidationUtil struct {
+}
+
+func (InputValidationUtil) IsValidEmail(email string) bool {
 	const emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	re := regexp.MustCompile(emailRegex)
 	return re.MatchString(email)
 }
 
-func IsValidPassword(p string) bool {
+func (InputValidationUtil) IsValidPassword(p string) bool {
 	var hasMinLen, hasUpper, hasLower, hasDigit, hasSpecial bool
 
 	if len(p) >= 8 {

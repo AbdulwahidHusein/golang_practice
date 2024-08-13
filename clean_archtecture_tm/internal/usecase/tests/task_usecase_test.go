@@ -67,11 +67,10 @@ func TestTaskUsecase(t *testing.T) {
 
 }
 
-func TestAddTak(t *testing.T) {
+func TestAddTak_positive(t *testing.T) {
 	mockTaskRepository := new(MockTaskRepository)
 	mockTaskRepository.On("AddTask", mock.Anything).Return(nil)
 	require.NoError(t, mockTaskRepository.AddTask(&domain.Task{}))
-
 }
 
 func TestGetAllTasks(t *testing.T) {

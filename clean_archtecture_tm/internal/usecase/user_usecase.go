@@ -6,7 +6,6 @@ import (
 	"errors"
 	"task_managemet_api/cmd/task_manager/internal/domain"
 	"task_managemet_api/cmd/task_manager/internal/repository"
-	"task_managemet_api/cmd/task_manager/pkg/validation"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -27,21 +26,23 @@ type UserUsecase struct {
 	userRepository repository.UserRepository
 	hasher         PasswordHasher
 	tokenGen       TokenGenerator
+	InputValidator InputValidator
 }
 
-func NewUserUsecase(userRepository repository.UserRepository, hasher PasswordHasher, tokenGen TokenGenerator) UserUsecase {
+func NewUserUsecase(userRepository repository.UserRepository, hasher PasswordHasher, tokenGen TokenGenerator, validator InputValidator) UserUsecase {
 	return UserUsecase{
 		userRepository: userRepository,
 		hasher:         hasher,
 		tokenGen:       tokenGen,
+		InputValidator: validator,
 	}
 }
 
 func (u UserUsecase) AddUser(user *domain.User) (*domain.User, error) {
-	if !validation.IsValidEmail(user.Email) {
+	if !u.InputValidator.IsValidEmail(user.Email) {
 		return nil, errors.New("invalid email format")
 	}
-	if !validation.IsValidPassword(user.Password) {
+	if !u.InputValidator.IsValidPassword(user.Password) {
 		return nil, errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
 	}
 	usr, err := u.userRepository.GetUserByEmail(user.Email)
@@ -146,10 +147,10 @@ func (u UserUsecase) ActivateUser(id primitive.ObjectID) (*domain.User, error) {
 }
 
 func (u UserUsecase) CreateAdmin(user *domain.User) (*domain.User, error) {
-	if !validation.IsValidEmail(user.Email) {
+	if !u.InputValidator.IsValidEmail(user.Email) {
 		return nil, errors.New("invalid email format")
 	}
-	if !validation.IsValidPassword(user.Password) {
+	if !u.InputValidator.IsValidPassword(user.Password) {
 		return nil, errors.New("password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
 	}
 	usr, err := u.userRepository.GetUserByEmail(user.Email)

@@ -77,14 +77,29 @@ func (m *MockTokenGenerator) CreateToken(userID, role, email string) (string, st
 	return args.String(0), args.String(1), args.Error(2)
 }
 
+type MockValidator struct {
+	mock.Mock
+}
+
+func (m *MockValidator) IsValidEmail(email string) bool {
+	args := m.Called(email)
+	return args.Bool(0)
+}
+
+func (m *MockValidator) IsValidPassword(password string) bool {
+	args := m.Called(password)
+	return args.Bool(0)
+}
+
 // Test for AddUser method
 // Test for AddUser method
-func TestUserUsecase_AddUser(t *testing.T) {
+func TestUserUsecase_AddUserPositive(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	mockHasher := new(MockPasswordHasher)
 	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
 
-	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
 
 	user := &domain.User{
 		Email:    "testAbc@gmail.com",
@@ -100,28 +115,82 @@ func TestUserUsecase_AddUser(t *testing.T) {
 	mockHasher.On("EncryptPassword", mock.Anything).Return("Stron@#$adgP@ssw0rd123", nil)
 	// Mock the AddUser to return the user
 	mockRepo.On("AddUser", user).Return(user, nil)
+	MockValidator.On("IsValidEmail", mock.Anything).Return(true)
+	MockValidator.On("IsValidPassword", mock.Anything).Return(true)
 
 	createdUser, err := userUsecase.AddUser(user)
 
-	if err != nil {
-		t.Fatalf("expected no error while adding user, but got: %v", err)
-	}
-	if createdUser == nil {
-		t.Fatal("expected non-nil user, but got nil")
-	}
-	if createdUser.Role != "user" {
-		t.Errorf("expected user role to be 'user', but got: %v", createdUser.Role)
-	}
+	require.NoError(t, err)
+	require.Equal(t, user.Email, createdUser.Email, "expected non-empty user email")
+	require.Equal(t, user.Role, createdUser.Role, "expected non-empty user role")
 
 	mockRepo.AssertExpectations(t)
+}
+
+func TestUserUsecase_AddUserRoleAssignedAsAdmin(t *testing.T) {
+	mockRepo := new(MockUserRepository)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
+
+	user := &domain.User{
+		Email:    "testAbc@gmail.com",
+		Password: "Stron@#$adgP@ssw0rd123",
+		Role:     "admin",
+	}
+
+	mockRepo.On("GetUserByEmail", mock.Anything).Return(nil, nil)
+
+	mockRepo.On("IsEmptyCollection", mock.Anything).Return(false, nil)
+
+	mockHasher.On("EncryptPassword", mock.Anything).Return("Stron@#$adgP@ssw0rd123", nil)
+	// Mock the AddUser to return the user
+	mockRepo.On("AddUser", user).Return(user, nil)
+	MockValidator.On("IsValidEmail", mock.Anything).Return(true)
+	MockValidator.On("IsValidPassword", mock.Anything).Return(true)
+
+	createdUser, err := userUsecase.AddUser(user)
+
+	require.NoError(t, err)
+	require.Equal(t, user.Email, createdUser.Email, "expected non-empty user email")
+	require.Equal(t, "user", createdUser.Role, "role must be user role but go %v", createdUser.Role)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestUserUsecase_AddUserUserAlreadyExist(t *testing.T) {
+
+	mockRepo := new(MockUserRepository)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
+
+	user := &domain.User{
+		Email:    "testAbc@gmail.com",
+		Password: "Stron@#$adgP@ssw0rd123",
+	}
+
+	mockRepo.On("GetUserByEmail", mock.Anything).Return(user, nil)
+	MockValidator.On("IsValidEmail", mock.Anything).Return(true)
+	MockValidator.On("IsValidPassword", mock.Anything).Return(true)
+
+	_, err := userUsecase.AddUser(user)
+
+	require.EqualError(t, err, "user with this email already exists")
+
 }
 
 func TestFirstUserAdmin(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	mockHasher := new(MockPasswordHasher)
 	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
 
-	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
 
 	user := &domain.User{
 		Email:    "testAbc@gmail.com",
@@ -131,8 +200,10 @@ func TestFirstUserAdmin(t *testing.T) {
 	mockRepo.On("IsEmptyCollection", mock.Anything).Return(true, nil)
 	mockRepo.On("AddUser", user).Return(user, nil)
 	mockHasher.On("EncryptPassword", mock.Anything).Return("passwordA@#$123", nil)
-	createdUser, err := userUsecase.AddUser(user)
+	MockValidator.On("IsValidEmail", mock.Anything).Return(true)
+	MockValidator.On("IsValidPassword", mock.Anything).Return(true)
 
+	createdUser, err := userUsecase.AddUser(user)
 	if err != nil {
 		t.Fatalf("expected no error while adding user, but got: %v", err)
 	}
@@ -142,12 +213,13 @@ func TestFirstUserAdmin(t *testing.T) {
 }
 
 // Test for DeleteUser method
-func TestUserUsecase_DeleteUser(t *testing.T) {
+func TestUserUsecase_DeleteUserDtScenarios(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	mockHasher := new(MockPasswordHasher)
 	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
 
-	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
 
 	userID := primitive.NewObjectID()
 	mockHasher.On("ComparePassword", mock.Anything, mock.Anything).Return(nil)
@@ -164,12 +236,13 @@ func TestUserUsecase_DeleteUser(t *testing.T) {
 }
 
 // Test for LoginUser method
-func TestUserUsecase_LoginUser(t *testing.T) {
+func TestUserUsecase_LoginUserPositive(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	mockHasher := new(MockPasswordHasher)
 	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
 
-	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
 
 	user := &domain.User{
 		Email:    "test@example.com",
@@ -193,8 +266,9 @@ func TestInvalidPasswordLogin(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	mockHasher := new(MockPasswordHasher)
 	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
 
-	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
 
 	user := &domain.User{
 		Email:    "test@example.com",
@@ -213,12 +287,13 @@ func TestInvalidPasswordLogin(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestUpdateUser(t *testing.T) {
+func TestUpdateUserDTScenarios(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	mockHasher := new(MockPasswordHasher)
 	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
 
-	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
 
 	user := &domain.User{
 		ID:       primitive.NewObjectID(),
@@ -249,12 +324,13 @@ func TestUpdateUser(t *testing.T) {
 
 }
 
-func TestCreateAdmin(t *testing.T) {
+func TestCreateAdminPositive(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	mockHasher := new(MockPasswordHasher)
 	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
 
-	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen)
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
 
 	user := &domain.User{
 		Email:    "testAbc@gmail.com",
@@ -265,10 +341,43 @@ func TestCreateAdmin(t *testing.T) {
 	mockRepo.On("GetUserByEmail", "testAbc@gmail.com").Return(nil, nil)
 	mockRepo.On("AddUser", user).Return(user, nil)
 
+	MockValidator.On("IsValidEmail", mock.Anything).Return(true)
+	MockValidator.On("IsValidPassword", mock.Anything).Return(true)
+
 	createdUser, err := userUsecase.CreateAdmin(user)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "admin", createdUser.Role)
+
+	mockRepo.AssertExpectations(t)
+
+}
+
+func TestCreateAdminRolePreAssignedAsUser(t *testing.T) {
+	mockRepo := new(MockUserRepository)
+	mockHasher := new(MockPasswordHasher)
+	mockTokenGen := new(MockTokenGenerator)
+	MockValidator := new(MockValidator)
+
+	userUsecase := usecase.NewUserUsecase(mockRepo, mockHasher, mockTokenGen, MockValidator)
+
+	user := &domain.User{
+		Email:    "testAbc@gmail.com",
+		Password: "passwordA@#$123",
+		Role:     "user",
+	}
+
+	mockHasher.On("EncryptPassword", mock.Anything).Return("passwordA@#$123", nil)
+	mockRepo.On("GetUserByEmail", "testAbc@gmail.com").Return(nil, nil)
+	mockRepo.On("AddUser", user).Return(user, nil)
+
+	MockValidator.On("IsValidEmail", mock.Anything).Return(true)
+	MockValidator.On("IsValidPassword", mock.Anything).Return(true)
+
+	createdUser, err := userUsecase.CreateAdmin(user)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "admin", createdUser.Role, "expected created user role to be: %v, but got: %v", "admin", createdUser.Role)
 
 	mockRepo.AssertExpectations(t)
 

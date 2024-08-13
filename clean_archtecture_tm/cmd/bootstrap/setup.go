@@ -6,6 +6,7 @@ import (
 	"task_managemet_api/cmd/task_manager/internal/routes"
 	"task_managemet_api/cmd/task_manager/internal/usecase"
 	"task_managemet_api/cmd/task_manager/pkg/security"
+	"task_managemet_api/cmd/task_manager/pkg/validation"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ func GetRouter(taskRepo repository.TaskRepository, userRepo repository.UserRepos
 	taskHandler := http.NewTaskHandler(taskUsecase)
 	routes.RegisterTaskRoutes(router, taskHandler)
 
-	userUsecase := usecase.NewUserUsecase(userRepo, security.PasswordUtil{}, &security.TokenUtil{})
+	userUsecase := usecase.NewUserUsecase(userRepo, security.PasswordUtil{}, &security.TokenUtil{}, validation.InputValidationUtil{})
 
 	fromTokenGetter := security.GetTokenData{}
 	userHandler := http.NewUserHandler(userUsecase, fromTokenGetter)
