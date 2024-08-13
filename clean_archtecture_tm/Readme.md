@@ -6,7 +6,6 @@ This repository contains the source code for a Task Manager API built using the 
 The API also includes endpoints for user authentication and authorization using JWT, ensuring that users can securely perform CRUD operations on their own tasks.
 
 This repository is built in adherence to clean architecture principles. By following these principles, the codebase is structured to promote separation of concerns, making it more manageable and easily scalable. The clean architecture ensures that the business logic is independent of the framework, UI, or external agencies, allowing for flexibility in adapting to changing requirements and facilitating easier testing and maintenance.
-folder structure
 
 
 ### Installation
@@ -38,6 +37,6 @@ go run main.go
 
 
 
-### API DOCUMENTATION: Visit 
+### API Documetation: Visit 
 <a  href="https://documenter.getpostman.com/view/28093624/2sA3rzLYy5" target="_blank">Postman Documentation Link</a>  OR
 <a href="https://github.com/AbdulwahidHusein/golang_practice/blob/main/clean_archtecture_tm/doc.md">Documentation.md</a>
