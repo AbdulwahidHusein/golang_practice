@@ -288,14 +288,14 @@ These routes allow authenticated users to manage their profiles and view task as
 
 These routes allow admins to control users
 
-#### **`GET admin/user/approve/:id`**
+#### **`PUT admin/user/approve/:id`**
 
 - **Description**: approves the user changing approved field to True.
 - **Headers**: 
   - `Authorization: Bearer <token>`
 - **Sample Request**:
   ```http
-  GET /users/me HTTP/1.1
+  PUT /admin/user/approve/60c72b2f9b7d6c001c8e4ae6 HTTP/1.1
   Host: api.example.com
   Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   ```
@@ -309,14 +309,14 @@ These routes allow admins to control users
   }
   ```
 
-#### **`GET admin/user/diapprove/:id`**
+#### **`PUT admin/user/diapprove/:id`**
 
 - **Description**: dis-approves the user changing approved field to True.
 - **Headers**: 
   - `Authorization: Bearer <token>`
 - **Sample Request**:
   ```http
-  GET /users/me HTTP/1.1
+  PUT /admin/userr/disapprove/60c72b2f9b7d6c001c8e4ae6 HTTP/1.1
   Host: api.example.com
   Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   ```
@@ -331,14 +331,14 @@ These routes allow admins to control users
 
 ### **Promote users to admin**
 
-#### **`GET admin/user/promote/:id`**
+#### **`PUT admin/user/promote/:id`**
 
 - **Description**: promotes a user with the given id to admin.
 - **Headers**: 
   - `Authorization: Bearer <token>`
 - **Sample Request**:
   ```http
-  GET /users/me HTTP/1.1
+  PUT admin/user/promote/60c72b2f9b7d6c001c8e4ae6 HTTP/1.1
   Host: api.example.com
   Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   ```
@@ -355,14 +355,14 @@ These routes allow admins to control users
 
   ### **demote user from being users to admin**
 
-#### **`GET admin/user/demote/:id`**
+#### **`PUT admin/user/demote/:id`**
 
 - **Description**: promotes a user with the given id to admin.
 - **Headers**: 
   - `Authorization: Bearer <token>`
 - **Sample Request**:
   ```http
-  GET /users/me HTTP/1.1
+  PUT /admin/user/demote/60c72b2f9b7d6c001c8e4ae6 HTTP/1.1
   Host: api.example.com
   Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   ```
